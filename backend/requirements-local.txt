@@ -1,0 +1,12 @@
+# ── Local Model Inference (optional) ──────────────────────────
+# Only needed if INFERENCE_MODE=local in .env
+# Requires NVIDIA GPU (CUDA) for good performance
+#
+# Install with: pip install -r requirements-local.txt
+
+torch
+torchaudio
+transformers
+accelerate
+sentencepiece
+sacremoses

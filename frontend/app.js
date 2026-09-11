@@ -1,0 +1,1031 @@
+/* ============================================================
+   app.js — Marathi-English Speech Translator PWA
+   ============================================================
+
+   Modules:
+   - Config        : Settings management (API URL, voice, HF token)
+   - API           : Backend calls (speech-to-text, text-to-speech)
+   - SpeechInput   : Mic recording + Web Speech API live transcript
+   - TTSPlayer     : Audio playback + word highlighting
+   - ChatUI        : Message rendering
+   - App           : Main coordinator
+   ============================================================ */
+
+"use strict";
+
+/* ─── Config ─────────────────────────────────────────────── */
+const Config = (() => {
+  const DEFAULTS = {
+    apiUrl: "http://localhost:8000",
+    voice: "Sunita",
+    hfToken: "hf_your_token_here",
+  };
+
+  let _settings = { ...DEFAULTS };
+
+  function load() {
+    try {
+      const saved = localStorage.getItem("marathi_translator_settings");
+      if (saved) {
+        _settings = { ...DEFAULTS, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.warn("Failed to load settings:", e);
+    }
+  }
+
+  function save(updates) {
+    _settings = { ...DEFAULTS, ..._settings, ...updates };
+    try {
+      localStorage.setItem("marathi_translator_settings", JSON.stringify(_settings));
+    } catch (e) {
+      console.warn("Failed to save settings:", e);
+    }
+  }
+
+  function get(key) { return _settings[key]; }
+
+  load();
+  return { get, save, load };
+})();
+
+
+/* ─── API Client ─────────────────────────────────────────── */
+const API = (() => {
+  async function speechToText(audioBlob) {
+    const apiUrl = Config.get("apiUrl");
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "recording.wav");
+
+    const response = await fetch(`${apiUrl}/api/speech-to-text`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || `API Error: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async function textToSpeech(englishText) {
+    const apiUrl = Config.get("apiUrl");
+    const response = await fetch(`${apiUrl}/api/text-to-speech`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ english_text: englishText }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || `API Error: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async function healthCheck() {
+    const apiUrl = Config.get("apiUrl");
+    const response = await fetch(`${apiUrl}/api/health`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    return response.json();
+  }
+
+  return { speechToText, textToSpeech, healthCheck };
+})();
+
+
+/* ─── Toast Notifications ────────────────────────────────── */
+const Toast = (() => {
+  let container;
+
+  function init() {
+    container = document.createElement("div");
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  function show(message, type = "info", duration = 3000) {
+    if (!container) init();
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), duration);
+  }
+
+  return { show };
+})();
+
+
+/* ─── TTS Player ─────────────────────────────────────────── */
+const TTSPlayer = (() => {
+  let _audioCtx = null;
+  let _sourceNode = null;
+  let _audioBuffer = null;
+  let _wordTimings = [];
+  let _startTime = 0;
+  let _pausedAt = 0;
+  let _isPlaying = false;
+  let _highlightInterval = null;
+  let _onWordChange = null;
+  let _onProgress = null;
+  let _onEnd = null;
+
+  function _getAudioCtx() {
+    if (!_audioCtx || _audioCtx.state === "closed") {
+      _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return _audioCtx;
+  }
+
+  async function load(base64Audio, wordTimings, callbacks = {}) {
+    stop();
+    _wordTimings = wordTimings || [];
+    _onWordChange = callbacks.onWordChange || null;
+    _onProgress = callbacks.onProgress || null;
+    _onEnd = callbacks.onEnd || null;
+    _pausedAt = 0;
+
+    const ctx = _getAudioCtx();
+    const bytes = Uint8Array.from(atob(base64Audio), (c) => c.charCodeAt(0));
+    _audioBuffer = await ctx.decodeAudioData(bytes.buffer);
+  }
+
+  function _startHighlighting(offsetTime = 0) {
+    if (_highlightInterval) clearInterval(_highlightInterval);
+
+    _highlightInterval = setInterval(() => {
+      if (!_isPlaying) return;
+
+      const ctx = _audioCtx;
+      const elapsed = ctx.currentTime - _startTime + offsetTime;
+      const total = _audioBuffer ? _audioBuffer.duration : 1;
+      const progress = Math.min((elapsed / total) * 100, 100);
+
+      if (_onProgress) _onProgress(progress, elapsed, total);
+
+      // Find current word
+      let activeIdx = -1;
+      for (let i = 0; i < _wordTimings.length; i++) {
+        const w = _wordTimings[i];
+        if (elapsed >= w.start && elapsed < w.end) {
+          activeIdx = i;
+          break;
+        }
+      }
+      if (_onWordChange) _onWordChange(activeIdx, elapsed);
+
+      if (elapsed >= total) {
+        _finishPlayback();
+      }
+    }, 50);
+  }
+
+  function _finishPlayback() {
+    _isPlaying = false;
+    if (_highlightInterval) clearInterval(_highlightInterval);
+    if (_onEnd) _onEnd();
+    if (_onWordChange) _onWordChange(-1, 0);
+    if (_onProgress) _onProgress(0, 0, 1);
+    _pausedAt = 0;
+  }
+
+  function play(fromOffset = 0) {
+    if (!_audioBuffer) return;
+    stop();
+
+    const ctx = _getAudioCtx();
+    if (ctx.state === "suspended") ctx.resume();
+
+    _sourceNode = ctx.createBufferSource();
+    _sourceNode.buffer = _audioBuffer;
+    _sourceNode.connect(ctx.destination);
+    _sourceNode.start(0, fromOffset);
+    _sourceNode.onended = () => {
+      if (_isPlaying) _finishPlayback();
+    };
+
+    _startTime = ctx.currentTime - fromOffset;
+    _isPlaying = true;
+    _startHighlighting(fromOffset);
+  }
+
+  function stop() {
+    if (_sourceNode) {
+      try {
+        _sourceNode.stop();
+        _sourceNode.disconnect();
+      } catch (e) { /* ignore */ }
+      _sourceNode = null;
+    }
+    _isPlaying = false;
+    if (_highlightInterval) {
+      clearInterval(_highlightInterval);
+      _highlightInterval = null;
+    }
+  }
+
+  function pause() {
+    if (!_isPlaying || !_audioCtx) return;
+    _pausedAt = _audioCtx.currentTime - _startTime;
+    stop();
+  }
+
+  function resume() {
+    play(_pausedAt);
+  }
+
+  function replay() {
+    _pausedAt = 0;
+    play(0);
+  }
+
+  function isPlaying() { return _isPlaying; }
+  function isPaused() { return !_isPlaying && _pausedAt > 0; }
+
+  return { load, play, stop, pause, resume, replay, isPlaying, isPaused };
+})();
+
+
+/* ─── Speech Input (Mic Recording + Web Speech API) ──────── */
+const SpeechInput = (() => {
+  let _mediaRecorder = null;
+  let _audioChunks = [];
+  let _recognition = null;
+  let _isRecording = false;
+  let _onInterim = null;    // live Marathi text callback
+  let _onFinal = null;      // final audio blob callback
+  let _onError = null;
+
+  // Setup Web Speech API for live Marathi transcription (Chrome only)
+  function _initSpeechRecognition() {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) return null;
+
+    const recog = new SpeechRecognition();
+    recog.lang = "mr-IN";        // Marathi India
+    recog.continuous = true;
+    recog.interimResults = true;
+    recog.maxAlternatives = 1;
+
+    recog.onresult = (event) => {
+      let interimText = "";
+      let finalText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalText += t;
+        } else {
+          interimText += t;
+        }
+      }
+      if (_onInterim) _onInterim(finalText + interimText, finalText, interimText);
+    };
+
+    recog.onerror = (e) => {
+      if (e.error !== "no-speech") {
+        console.warn("Speech recognition error:", e.error);
+      }
+    };
+
+    return recog;
+  }
+
+  async function _startMediaRecorder(stream) {
+    // Prefer audio/webm;codecs=opus (best quality), fall back to audio/ogg or audio/wav
+    const mimeTypes = [
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/ogg;codecs=opus",
+      "audio/ogg",
+      "audio/wav",
+    ];
+    let mimeType = "";
+    for (const mt of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(mt)) {
+        mimeType = mt;
+        break;
+      }
+    }
+
+    _audioChunks = [];
+    const options = mimeType ? { mimeType } : {};
+    _mediaRecorder = new MediaRecorder(stream, options);
+
+    _mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) _audioChunks.push(e.data);
+    };
+
+    _mediaRecorder.onstop = () => {
+      const blob = new Blob(_audioChunks, { type: mimeType || "audio/webm" });
+      if (_onFinal) _onFinal(blob);
+    };
+
+    _mediaRecorder.start(100); // collect chunks every 100ms
+  }
+
+  async function startRecording(callbacks = {}) {
+    if (_isRecording) return;
+    _onInterim = callbacks.onInterim || null;
+    _onFinal = callbacks.onFinal || null;
+    _onError = callbacks.onError || null;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          sampleRate: 16000,
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });
+
+      await _startMediaRecorder(stream);
+      _isRecording = true;
+
+      // Start live speech recognition in parallel
+      _recognition = _initSpeechRecognition();
+      if (_recognition) {
+        _recognition.start();
+      }
+
+      return stream;
+    } catch (err) {
+      console.error("Mic access error:", err);
+      if (_onError) _onError(err.name === "NotAllowedError"
+        ? "Microphone permission denied. Please allow mic access."
+        : "Could not access microphone: " + err.message
+      );
+      return null;
+    }
+  }
+
+  function stopRecording() {
+    if (!_isRecording) return;
+    _isRecording = false;
+
+    if (_recognition) {
+      try { _recognition.stop(); } catch (e) { /* ignore */ }
+      _recognition = null;
+    }
+
+    if (_mediaRecorder && _mediaRecorder.state !== "inactive") {
+      _mediaRecorder.stop();
+      // Stop mic stream
+      _mediaRecorder.stream.getTracks().forEach((t) => t.stop());
+    }
+  }
+
+  function isRecording() { return _isRecording; }
+  function hasWebSpeech() {
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  }
+
+  return { startRecording, stopRecording, isRecording, hasWebSpeech };
+})();
+
+
+/* ─── Chat UI ─────────────────────────────────────────────── */
+const ChatUI = (() => {
+  let _chatArea;
+  let _welcomeScreen;
+
+  function init(chatArea, welcomeScreen) {
+    _chatArea = chatArea;
+    _welcomeScreen = welcomeScreen;
+  }
+
+  function _hideWelcome() {
+    if (_welcomeScreen && !_welcomeScreen.classList.contains("hidden")) {
+      _welcomeScreen.classList.add("hidden");
+    }
+  }
+
+  function _scrollToBottom() {
+    requestAnimationFrame(() => {
+      _chatArea.scrollTop = _chatArea.scrollHeight;
+    });
+  }
+
+  function _createAvatar(type) {
+    const el = document.createElement("div");
+    el.className = "message-avatar";
+    el.textContent = type === "user" ? "🧑" : "🤖";
+    return el;
+  }
+
+  function _createLabel(text) {
+    const el = document.createElement("div");
+    el.className = "message-label";
+    el.textContent = text;
+    return el;
+  }
+
+  /**
+   * Add a user Marathi speech message (2 bubbles: Marathi + English)
+   */
+  function addSpeechResult(marathiText, englishText) {
+    _hideWelcome();
+
+    // User side: Marathi speech bubble
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user";
+    const userBody = document.createElement("div");
+    userBody.className = "message-body";
+    userBody.appendChild(_createLabel("आपण बोललात (Marathi)"));
+    const marathiBubble = document.createElement("div");
+    marathiBubble.className = "bubble marathi-speech";
+    marathiBubble.textContent = marathiText;
+    userBody.appendChild(marathiBubble);
+    userMsg.appendChild(_createAvatar("user"));
+    userMsg.appendChild(userBody);
+    _chatArea.appendChild(userMsg);
+
+    // Bot side: English translation bubble
+    const botMsg = document.createElement("div");
+    botMsg.className = "message bot";
+    const botBody = document.createElement("div");
+    botBody.className = "message-body";
+    botBody.appendChild(_createLabel("English Translation"));
+    const englishBubble = document.createElement("div");
+    englishBubble.className = "bubble english-translation";
+    englishBubble.textContent = englishText;
+    botBody.appendChild(englishBubble);
+    botMsg.appendChild(_createAvatar("bot"));
+    botMsg.appendChild(botBody);
+    _chatArea.appendChild(botMsg);
+
+    _scrollToBottom();
+    return { userMsg, botMsg };
+  }
+
+  /**
+   * Add user English text message
+   */
+  function addUserText(englishText) {
+    _hideWelcome();
+    const msg = document.createElement("div");
+    msg.className = "message user";
+    const body = document.createElement("div");
+    body.className = "message-body";
+    body.appendChild(_createLabel("English Text"));
+    const bubble = document.createElement("div");
+    bubble.className = "bubble user-text";
+    bubble.textContent = englishText;
+    body.appendChild(bubble);
+    msg.appendChild(_createAvatar("user"));
+    msg.appendChild(body);
+    _chatArea.appendChild(msg);
+    _scrollToBottom();
+    return msg;
+  }
+
+  /**
+   * Add loading typing bubble (returns element to remove later)
+   */
+  function addTypingBubble() {
+    _hideWelcome();
+    const msg = document.createElement("div");
+    msg.className = "message bot";
+    const body = document.createElement("div");
+    body.className = "message-body";
+    const typing = document.createElement("div");
+    typing.className = "typing-bubble";
+    [1, 2, 3].forEach(() => {
+      const dot = document.createElement("div");
+      dot.className = "typing-dot";
+      typing.appendChild(dot);
+    });
+    body.appendChild(typing);
+    msg.appendChild(_createAvatar("bot"));
+    msg.appendChild(body);
+    _chatArea.appendChild(msg);
+    _scrollToBottom();
+    return msg;
+  }
+
+  /**
+   * Add TTS result bubble with word highlighting + player controls
+   */
+  function addTTSResult(marathiText, wordTimings, audioBase64, voice, duration) {
+    const msg = document.createElement("div");
+    msg.className = "message bot";
+    const body = document.createElement("div");
+    body.className = "message-body";
+    body.appendChild(_createLabel(`🔊 Marathi Speech (${voice})`));
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble tts-bubble";
+
+    // Word spans
+    const wordsDiv = document.createElement("div");
+    wordsDiv.className = "tts-words";
+
+    const wordSpans = wordTimings.map((w, i) => {
+      const span = document.createElement("span");
+      span.className = "tts-word";
+      span.dataset.index = i;
+      span.textContent = w.word + " ";
+      wordsDiv.appendChild(span);
+      return span;
+    });
+
+    // If no word timings, just show plain text
+    if (wordTimings.length === 0) {
+      wordsDiv.textContent = marathiText;
+      wordsDiv.style.fontFamily = "'Noto Sans Devanagari', sans-serif";
+    }
+
+    bubble.appendChild(wordsDiv);
+
+    // Player controls
+    const player = document.createElement("div");
+    player.className = "tts-player";
+
+    const controls = document.createElement("div");
+    controls.className = "tts-controls";
+
+    // Play/Pause button
+    const playBtn = document.createElement("button");
+    playBtn.className = "tts-btn";
+    playBtn.id = `play-${Date.now()}`;
+    playBtn.title = "Play";
+    playBtn.innerHTML = "▶";
+    playBtn.setAttribute("aria-label", "Play Marathi speech");
+
+    // Replay button
+    const replayBtn = document.createElement("button");
+    replayBtn.className = "tts-btn";
+    replayBtn.title = "Replay from start";
+    replayBtn.innerHTML = "↺";
+    replayBtn.setAttribute("aria-label", "Replay Marathi speech");
+
+    // Progress bar
+    const progressBar = document.createElement("div");
+    progressBar.className = "tts-progress";
+    const progressFill = document.createElement("div");
+    progressFill.className = "tts-progress-fill";
+    progressBar.appendChild(progressFill);
+
+    // Time display
+    const timeEl = document.createElement("div");
+    timeEl.className = "tts-time";
+    timeEl.textContent = `0:00 / ${_formatTime(duration)}`;
+
+    // Voice badge
+    const voiceBadge = document.createElement("div");
+    voiceBadge.className = "tts-voice-badge";
+    voiceBadge.textContent = voice;
+
+    controls.appendChild(playBtn);
+    controls.appendChild(replayBtn);
+    controls.appendChild(progressBar);
+    controls.appendChild(timeEl);
+    controls.appendChild(voiceBadge);
+    player.appendChild(controls);
+    bubble.appendChild(player);
+    body.appendChild(bubble);
+
+    msg.appendChild(_createAvatar("bot"));
+    msg.appendChild(body);
+    _chatArea.appendChild(msg);
+    _scrollToBottom();
+
+    // ── Wire up TTS player ──────────────────────────────────
+    let playerLoaded = false;
+
+    async function _ensureLoaded() {
+      if (playerLoaded) return;
+      playerLoaded = true;
+      await TTSPlayer.load(audioBase64, wordTimings, {
+        onWordChange: (activeIdx) => {
+          wordSpans.forEach((span, i) => {
+            span.classList.toggle("active", i === activeIdx);
+            span.classList.toggle("spoken", activeIdx >= 0 && i < activeIdx);
+          });
+        },
+        onProgress: (pct, elapsed, total) => {
+          progressFill.style.width = pct + "%";
+          timeEl.textContent = `${_formatTime(elapsed)} / ${_formatTime(total)}`;
+        },
+        onEnd: () => {
+          playBtn.innerHTML = "▶";
+          playBtn.classList.remove("playing");
+          wordSpans.forEach((s) => s.classList.remove("active", "spoken"));
+          progressFill.style.width = "0%";
+          timeEl.textContent = `0:00 / ${_formatTime(duration)}`;
+        },
+      });
+    }
+
+    playBtn.addEventListener("click", async () => {
+      await _ensureLoaded();
+      if (TTSPlayer.isPlaying()) {
+        TTSPlayer.pause();
+        playBtn.innerHTML = "▶";
+        playBtn.classList.remove("playing");
+      } else if (TTSPlayer.isPaused()) {
+        TTSPlayer.resume();
+        playBtn.innerHTML = "⏸";
+        playBtn.classList.add("playing");
+      } else {
+        TTSPlayer.play(0);
+        playBtn.innerHTML = "⏸";
+        playBtn.classList.add("playing");
+      }
+    });
+
+    replayBtn.addEventListener("click", async () => {
+      await _ensureLoaded();
+      TTSPlayer.replay();
+      playBtn.innerHTML = "⏸";
+      playBtn.classList.add("playing");
+    });
+
+    return msg;
+  }
+
+  /**
+   * Add an error bubble (bot side)
+   */
+  function addError(message) {
+    const msg = document.createElement("div");
+    msg.className = "message bot";
+    const body = document.createElement("div");
+    body.className = "message-body";
+    const bubble = document.createElement("div");
+    bubble.className = "bubble error";
+    bubble.textContent = "⚠️ " + message;
+    body.appendChild(bubble);
+    msg.appendChild(_createAvatar("bot"));
+    msg.appendChild(body);
+    _chatArea.appendChild(msg);
+    _scrollToBottom();
+    return msg;
+  }
+
+  function _formatTime(seconds) {
+    if (!isFinite(seconds) || isNaN(seconds)) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  }
+
+  return {
+    init,
+    addSpeechResult,
+    addUserText,
+    addTypingBubble,
+    addTTSResult,
+    addError,
+  };
+})();
+
+
+/* ─── Settings Modal ─────────────────────────────────────── */
+const Settings = (() => {
+  let _modal, _overlay;
+  const VOICES = ["Sunita", "Sanjay", "Nikhil", "Radha", "Varun", "Isha"];
+  let _selectedVoice = Config.get("voice");
+
+  function init() {
+    _overlay = document.getElementById("settings-overlay");
+    _modal = document.getElementById("settings-modal");
+
+    // Build voice grid
+    const voiceGrid = document.getElementById("voice-grid");
+    VOICES.forEach((voice) => {
+      const btn = document.createElement("button");
+      btn.className = `voice-btn${voice === _selectedVoice ? " selected" : ""}`;
+      btn.textContent = voice;
+      btn.dataset.voice = voice;
+      btn.addEventListener("click", () => {
+        voiceGrid.querySelectorAll(".voice-btn").forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        _selectedVoice = voice;
+      });
+      voiceGrid.appendChild(btn);
+    });
+
+    // Load saved values
+    document.getElementById("api-url-input").value = Config.get("apiUrl");
+
+    // Save button
+    document.getElementById("settings-save").addEventListener("click", () => {
+      const apiUrl = document.getElementById("api-url-input").value.trim();
+      Config.save({ apiUrl, voice: _selectedVoice });
+      close();
+      Toast.show(`Settings saved! Voice: ${_selectedVoice}`, "success");
+    });
+
+    // Close
+    document.getElementById("settings-close").addEventListener("click", close);
+    _overlay.addEventListener("click", (e) => {
+      if (e.target === _overlay) close();
+    });
+  }
+
+  function open() {
+    _overlay.classList.add("open");
+    document.getElementById("api-url-input").value = Config.get("apiUrl");
+  }
+
+  function close() {
+    _overlay.classList.remove("open");
+  }
+
+  return { init, open, close };
+})();
+
+
+/* ─── App ─────────────────────────────────────────────────── */
+const App = (() => {
+  let _micBtn, _micLabel;
+  let _textInput, _sendBtn;
+  let _transcriptEl;
+  let _isProcessing = false;
+  let _interimText = "";
+  let _finalLiveText = "";
+
+  function init() {
+    // DOM refs
+    _micBtn = document.getElementById("mic-btn");
+    _micLabel = document.getElementById("mic-label");
+    _textInput = document.getElementById("text-input");
+    _sendBtn = document.getElementById("send-btn");
+    _transcriptEl = document.getElementById("input-transcript");
+
+    const chatArea = document.getElementById("chat-area");
+    const welcomeScreen = document.getElementById("welcome-screen");
+
+    ChatUI.init(chatArea, welcomeScreen);
+    Settings.init();
+
+    // Settings button
+    document.getElementById("settings-btn").addEventListener("click", Settings.open);
+
+    // Mic button
+    _micBtn.addEventListener("click", _toggleMic);
+
+    // Text input
+    _textInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        _sendText();
+      }
+    });
+    _textInput.addEventListener("input", _autoResize);
+    _sendBtn.addEventListener("click", _sendText);
+
+    // Check backend health
+    _checkHealth();
+
+    // PWA install prompt
+    _setupInstallPrompt();
+
+    // Register service worker
+    _registerSW();
+  }
+
+  // ── Mic: toggle recording ────────────────────────────────
+  let _micStarting = false;
+
+  async function _toggleMic() {
+    if (_isProcessing || _micStarting) return;
+
+    if (SpeechInput.isRecording()) {
+      // Stop recording
+      SpeechInput.stopRecording();
+      _micBtn.classList.remove("recording");
+      _micBtn.classList.add("processing");
+      _setMicLabel("Processing...");
+      _isProcessing = true;
+      return;
+    }
+
+    // Start recording
+    _micStarting = true;
+    _micBtn.classList.add("recording");
+    _setMicLabel("Tap to stop...");
+    _interimText = "";
+    _finalLiveText = "";
+    _showTranscript("");
+
+    const stream = await SpeechInput.startRecording({
+      onInterim: (text, finalPart, interimPart) => {
+        _finalLiveText = finalPart;
+        _interimText = interimPart;
+        _showTranscript(finalPart, interimPart);
+      },
+      onFinal: (audioBlob) => {
+        _processSpeech(audioBlob);
+      },
+      onError: (msg) => {
+        _micBtn.classList.remove("recording");
+        _setMicLabel("Tap to speak");
+        _hideTranscript();
+        Toast.show(msg, "error");
+        _isProcessing = false;
+        _micStarting = false;
+      },
+    });
+
+    if (!stream) {
+      _micBtn.classList.remove("recording");
+      _setMicLabel("Tap to speak");
+    }
+    
+    _micStarting = false;
+  }
+
+  // ── Process speech audio blob → API ────────────────────
+  async function _processSpeech(audioBlob) {
+    if (audioBlob.size < 1000) {
+      // Too small — probably no speech
+      _micBtn.classList.remove("processing");
+      _setMicLabel("Tap to speak");
+      _hideTranscript();
+      _isProcessing = false;
+      Toast.show("No speech detected. Try again!", "info");
+      return;
+    }
+
+    const typingEl = ChatUI.addTypingBubble();
+
+    try {
+      const result = await API.speechToText(audioBlob);
+      typingEl.remove();
+      _hideTranscript();
+
+      if (result.marathi_text) {
+        ChatUI.addSpeechResult(result.marathi_text, result.english_text);
+      } else {
+        ChatUI.addError("No speech detected. Please try again.");
+      }
+    } catch (err) {
+      typingEl.remove();
+      _hideTranscript();
+      ChatUI.addError(err.message || "Speech recognition failed.");
+      Toast.show("Error: " + err.message, "error");
+    } finally {
+      _micBtn.classList.remove("processing");
+      _setMicLabel("Tap to speak");
+      _isProcessing = false;
+    }
+  }
+
+  // ── Send English text → API ─────────────────────────────
+  async function _sendText() {
+    const text = _textInput.value.trim();
+    if (!text || _isProcessing) return;
+
+    _isProcessing = true;
+    _textInput.value = "";
+    _autoResize();
+    _sendBtn.disabled = true;
+
+    ChatUI.addUserText(text);
+    const typingEl = ChatUI.addTypingBubble();
+
+    try {
+      const result = await API.textToSpeech(text);
+      typingEl.remove();
+
+      ChatUI.addTTSResult(
+        result.marathi_text,
+        result.word_timings,
+        result.audio_base64,
+        result.voice || Config.get("voice"),
+        result.duration || 3,
+      );
+    } catch (err) {
+      typingEl.remove();
+      ChatUI.addError(err.message || "Text-to-speech failed.");
+      Toast.show("Error: " + err.message, "error");
+    } finally {
+      _isProcessing = false;
+      _sendBtn.disabled = false;
+    }
+  }
+
+  // ── UI helpers ──────────────────────────────────────────
+  function _setMicLabel(text) {
+    if (_micLabel) _micLabel.textContent = text;
+  }
+
+  function _showTranscript(finalText, interimText = "") {
+    _transcriptEl.classList.add("visible");
+    _transcriptEl.innerHTML = "";
+    if (finalText) {
+      const finalSpan = document.createElement("span");
+      finalSpan.textContent = finalText;
+      _transcriptEl.appendChild(finalSpan);
+    }
+    if (interimText) {
+      const interim = document.createElement("span");
+      interim.className = "interim";
+      interim.textContent = (finalText ? " " : "") + interimText;
+      _transcriptEl.appendChild(interim);
+    }
+    if (!finalText && !interimText) {
+      const ph = document.createElement("span");
+      ph.className = "live-placeholder";
+      ph.textContent = "बोलत आहे... (Listening...)";
+      _transcriptEl.appendChild(ph);
+    }
+  }
+
+  function _hideTranscript() {
+    _transcriptEl.classList.remove("visible");
+    _transcriptEl.innerHTML = "";
+  }
+
+  function _autoResize() {
+    _textInput.style.height = "auto";
+    _textInput.style.height = Math.min(_textInput.scrollHeight, 140) + "px";
+  }
+
+  // ── Backend health check ────────────────────────────────
+  async function _checkHealth() {
+    const indicator = document.getElementById("status-indicator");
+    const statusText = document.getElementById("status-text");
+
+    try {
+      const health = await API.healthCheck();
+      indicator.classList.add("connected");
+      indicator.classList.remove("error");
+      statusText.textContent = `Connected · ${health.inference_mode}`;
+    } catch {
+      indicator.classList.remove("connected");
+      indicator.classList.add("error");
+      statusText.textContent = "Backend offline";
+      Toast.show(
+        "⚠️ Backend not reachable. Start the server at " + Config.get("apiUrl"),
+        "error",
+        6000
+      );
+    }
+  }
+
+  // ── PWA install prompt ──────────────────────────────────
+  let _deferredPrompt = null;
+
+  function _setupInstallPrompt() {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      _deferredPrompt = e;
+
+      const prompt = document.createElement("div");
+      prompt.className = "install-prompt";
+      prompt.innerHTML = `
+        <div class="install-text">
+          <strong>📱 Install App</strong><br>
+          Add Marathi Translator to your home screen
+        </div>
+        <button class="install-btn" id="install-btn">Install</button>
+        <button class="install-dismiss" id="install-dismiss">✕</button>
+      `;
+      document.body.appendChild(prompt);
+
+      document.getElementById("install-btn").addEventListener("click", async () => {
+        _deferredPrompt.prompt();
+        const { outcome } = await _deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          Toast.show("App installed! 🎉", "success");
+        }
+        prompt.remove();
+        _deferredPrompt = null;
+      });
+
+      document.getElementById("install-dismiss").addEventListener("click", () => {
+        prompt.remove();
+      });
+    });
+  }
+
+  // ── Service Worker registration ─────────────────────────
+  function _registerSW() {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch((err) => {
+          console.warn("SW registration failed:", err);
+        });
+      });
+    }
+  }
+
+  return { init };
+})();
+
+
+/* ─── Boot ────────────────────────────────────────────────── */
+document.addEventListener("DOMContentLoaded", () => {
+  App.init();
+  Toast.show("🙏 नमस्कार! Tap the mic to speak Marathi.", "info", 4000);
+});

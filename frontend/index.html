@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="mr" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#FF6B2B" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="मराठी Translator" />
+
+  <!-- SEO -->
+  <title>मराठी-इंग्रजी भाषांतरक | Marathi-English Speech Translator</title>
+  <meta name="description" content="Speak Marathi and get English translation. Type English and hear it in Marathi. AI-powered speech translator for Maharashtra." />
+  <meta name="keywords" content="Marathi speech to text, English to Marathi TTS, AI4Bharat, Marathi translator, Maharashtra" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="मराठी-इंग्रजी भाषांतरक" />
+  <meta property="og:description" content="AI-powered Marathi speech recognition and English-to-Marathi text-to-speech chatbot" />
+  <meta property="og:type" content="website" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎤</text></svg>" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Background mesh gradient -->
+<div class="bg-mesh" aria-hidden="true"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="app-header" role="banner">
+    <div class="app-logo">
+      <div class="logo-icon" aria-hidden="true">🎙️</div>
+      <div class="logo-text">
+        <span class="logo-title">मराठी Translator</span>
+        <span class="logo-subtitle">मराठी ⇄ English AI Translator</span>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <div class="status-indicator" id="status-indicator" role="status" aria-live="polite">
+        <div class="status-dot"></div>
+        <span id="status-text">Connecting...</span>
+      </div>
+      <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Open settings">
+        ⚙️
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Chat Area ─────────────────────────────────────── -->
+  <main class="chat-area" id="chat-area" role="main" aria-label="Chat messages" aria-live="polite">
+
+    <!-- Welcome Screen (hidden after first message) -->
+    <div class="welcome-screen" id="welcome-screen" role="complementary" aria-label="Getting started">
+      <div class="welcome-icon" aria-hidden="true">🌾</div>
+
+      <div>
+        <h1 class="welcome-title">
+          नमस्कार! Speak <span>Marathi</span>,<br />
+          Hear it in <span>English</span>
+        </h1>
+        <p class="welcome-subtitle">
+          Hold the mic button and speak in Marathi.<br />
+          Or type English text to hear it spoken in Marathi.
+        </p>
+      </div>
+
+      <div class="welcome-tips" role="list">
+        <div class="tip-card" role="listitem">
+          <span class="tip-icon">🎙️</span>
+          <span>Hold mic &amp; speak <strong>Marathi</strong></span>
+        </div>
+        <div class="tip-card" role="listitem">
+          <span class="tip-icon">📝</span>
+          <span>Type <strong>English</strong> text</span>
+        </div>
+        <div class="tip-card" role="listitem">
+          <span class="tip-icon">🔊</span>
+          <span>Tap ↺ to <strong>replay</strong> Marathi speech</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Input Bar ─────────────────────────────────────── -->
+  <footer class="input-bar" role="contentinfo">
+
+    <!-- Live Marathi transcript (shown while recording) -->
+    <div
+      class="input-transcript"
+      id="input-transcript"
+      aria-label="Live Marathi transcript"
+      aria-live="polite"
+    ></div>
+
+    <div class="input-row">
+
+      <!-- Mic Button -->
+      <div class="mic-container">
+        <button
+          class="mic-btn"
+          id="mic-btn"
+          aria-label="Hold to record Marathi speech"
+          title="Hold to speak in Marathi"
+        >
+          🎙️
+        </button>
+        <div class="mic-label" id="mic-label" aria-hidden="true">Hold to speak</div>
+      </div>
+
+      <!-- Text Input -->
+      <div class="text-input-wrapper">
+        <textarea
+          id="text-input"
+          placeholder="Type English text here... (Shift+Enter for new line)"
+          rows="1"
+          maxlength="2000"
+          aria-label="Type English text to convert to Marathi speech"
+          autocomplete="off"
+          spellcheck="true"
+        ></textarea>
+        <button
+          class="send-btn"
+          id="send-btn"
+          aria-label="Send English text for Marathi translation"
+          title="Send (Enter)"
+        >
+          ➤
+        </button>
+      </div>
+
+    </div>
+  </footer>
+
+</div>
+<!-- /#app -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SETTINGS MODAL
+═══════════════════════════════════════════════════════ -->
+<div
+  class="modal-overlay"
+  id="settings-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+>
+  <div class="modal" id="settings-modal">
+
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">
+        ⚙️ Settings
+      </div>
+      <button class="modal-close" id="settings-close" aria-label="Close settings">✕</button>
+    </div>
+
+    <!-- API URL -->
+    <div class="modal-section">
+      <label class="modal-label" for="api-url-input">Backend API URL</label>
+      <input
+        type="url"
+        id="api-url-input"
+        class="modal-input"
+        placeholder="http://localhost:8000"
+        value="http://localhost:8000"
+        aria-describedby="api-url-help"
+      />
+      <p id="api-url-help" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">
+        Start backend: <code style="color: var(--accent);">cd backend && start.bat</code>
+      </p>
+    </div>
+
+    <!-- Voice Selection -->
+    <div class="modal-section">
+      <label class="modal-label">Marathi TTS Voice</label>
+      <div class="voice-grid" id="voice-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Save -->
+    <button class="modal-save" id="settings-save">
+      Save Settings
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════════ -->
+<script src="app.js"></script>
+
+</body>
+</html>

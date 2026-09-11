@@ -1,0 +1,40 @@
+{
+  "name": "मराठी-इंग्रजी भाषांतरक",
+  "short_name": "मराठी Translator",
+  "description": "Marathi Speech to English Text and English Text to Marathi Speech converter",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D1117",
+  "theme_color": "#FF6B2B",
+  "orientation": "portrait-primary",
+  "lang": "mr",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "shortcuts": [
+    {
+      "name": "बोला मराठीत",
+      "short_name": "Speak",
+      "description": "Start Marathi speech input",
+      "url": "/?mode=speech"
+    },
+    {
+      "name": "टाइप करा इंग्रजीत",
+      "short_name": "Type",
+      "description": "Type English text",
+      "url": "/?mode=text"
+    }
+  ]
+}
