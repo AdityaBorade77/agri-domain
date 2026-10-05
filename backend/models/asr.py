@@ -8,6 +8,7 @@ Mode: local (loads model) or api (HF Inference API)
 
 import os
 import io
+import asyncio
 import logging
 import base64
 import httpx
@@ -159,7 +160,9 @@ async def transcribe_marathi(audio_bytes: bytes) -> str:
 
     logger.info("Transcribing audio (%d bytes), mode=%s", len(audio_bytes), INFERENCE_MODE)
 
+    # Run blocking work (ffmpeg, HTTP, model inference) off the event loop so
+    # concurrent requests aren't serialized behind each other.
     if INFERENCE_MODE == "local":
-        return _transcribe_local(audio_bytes)
+        return await asyncio.to_thread(_transcribe_local, audio_bytes)
     else:
-        return _transcribe_api(audio_bytes)
+        return await asyncio.to_thread(_transcribe_api, audio_bytes)

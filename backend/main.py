@@ -9,14 +9,17 @@ Routes:
 """
 
 import os
+import asyncio
 import logging
 from contextlib import asynccontextmanager
+from typing import Optional
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from openai import AsyncOpenAI
 
 # Load environment variables
 load_dotenv()
@@ -28,11 +31,45 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Bypass WDAC blocking sklearn DLLs (sparsefuncs_fast.pyd)
+import sys
+from unittest.mock import MagicMock
+sys.modules['sklearn.utils.sparsefuncs_fast'] = MagicMock()
+
 # Import model modules
 from models.asr import transcribe_marathi
 from models.translation import translate_marathi_to_english, translate_english_to_marathi
 from models.tts import synthesize_marathi_speech
+from models.db import init_db, create_chat, get_chats, get_chat_messages, add_message, delete_chat
+from utils.text_cleaner import clean_for_translation
 
+# ─── LLM Config ───────────────────────────────────────────────────────────────
+
+# Third-party models on NVIDIA's free tier (DeepSeek, Gemma, GLM, Kimi) are
+# often queued for minutes; NVIDIA's own Nemotron models respond in seconds.
+LLM_MODEL = os.getenv("LLM_MODEL", "nvidia/nemotron-3-ultra-550b-a55b")
+LLM_FALLBACK_MODEL = os.getenv("LLM_FALLBACK_MODEL", "nvidia/nemotron-3-super-120b-a12b")
+LLM_HEDGE_AFTER = float(os.getenv("LLM_HEDGE_AFTER", "8"))
+LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "40"))
+LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "600"))
+
+LANGUAGE_NAMES = {
+    "mr": "Marathi", "hi": "Hindi", "en": "English", "gu": "Gujarati",
+    "kn": "Kannada", "te": "Telugu", "ta": "Tamil", "bn": "Bengali", "pa": "Punjabi",
+}
+
+FARMER_SYSTEM_PROMPT = (
+    "You are Krishi Mitra, an agricultural advisor for small farmers in India. "
+    "Always reply in {language} using simple, everyday words a farmer understands. "
+    "Keep answers short: 3 to 6 sentences, practical and actionable "
+    "(what to do, how much, when). Mention locally available remedies and "
+    "safe pesticide use where relevant, and suggest contacting the local "
+    "Krishi Vigyan Kendra for serious problems. Your reply will be read aloud "
+    "by a text-to-speech engine, so write plain sentences only: no markdown, "
+    "no bullet points, no headings, no emojis, no tables."
+)
+
+_llm_client: Optional[AsyncOpenAI] = None
 
 # ─── App Setup ────────────────────────────────────────────────────────────────
 
@@ -40,6 +77,7 @@ from models.tts import synthesize_marathi_speech
 async def lifespan(app: FastAPI):
     """Startup/shutdown lifecycle."""
     logger.info("🚀 Marathi-English Speech Translator API starting...")
+    init_db()
     logger.info("Inference mode: %s", os.getenv("INFERENCE_MODE", "api"))
     logger.info("TTS Voice: %s", os.getenv("TTS_VOICE", "Sunita"))
     yield
@@ -67,12 +105,26 @@ app.add_middleware(
 # ─── Pydantic Models ──────────────────────────────────────────────────────────
 
 class TextToSpeechRequest(BaseModel):
-    english_text: str
+    english_text: Optional[str] = None
+    # When the text is already Marathi (e.g. the LLM replied in Marathi),
+    # send it here to skip the EN→MR translation step.
+    marathi_text: Optional[str] = None
+    voice: Optional[str] = None
 
 
 class SpeechToTextResponse(BaseModel):
     marathi_text: str
     english_text: str
+    success: bool = True
+
+
+class ChatRequest(BaseModel):
+    text: str
+    reply_language: str = "mr"
+
+
+class ChatResponse(BaseModel):
+    response: str
     success: bool = True
 
 
@@ -84,6 +136,13 @@ class TextToSpeechResponse(BaseModel):
     voice: str
     success: bool = True
 
+class CreateChatRequest(BaseModel):
+    title: str
+
+class AddMessageRequest(BaseModel):
+    role: str
+    msg_type: str
+    content: dict
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
@@ -100,7 +159,7 @@ async def health_check():
 
 
 @app.post("/api/speech-to-text", response_model=SpeechToTextResponse)
-async def speech_to_text(audio: UploadFile = File(...)):
+async def speech_to_text(audio: UploadFile = File(...), translate: bool = Form(True)):
     """
     Convert Marathi speech audio to English text.
 
@@ -129,9 +188,12 @@ async def speech_to_text(audio: UploadFile = File(...)):
                 success=True,
             )
 
-        # Step 2: Translate Marathi → English
-        english_text = await translate_marathi_to_english(marathi_text)
-        logger.info("Translated: %s", english_text[:100])
+        # Step 2: Translate Marathi → English (optional — the LLM understands
+        # Marathi directly, so the voice-chat flow skips this hop)
+        english_text = ""
+        if translate:
+            english_text = await translate_marathi_to_english(marathi_text)
+            logger.info("Translated: %s", english_text[:100])
 
         return SpeechToTextResponse(
             marathi_text=marathi_text,
@@ -156,26 +218,29 @@ async def text_to_speech(request: TextToSpeechRequest):
     Pipeline:
       English Text → IndicTrans2 → Marathi Text → Indic Parler-TTS → Audio + Word Timings
     """
-    english_text = request.english_text.strip()
+    source_text = (request.marathi_text or request.english_text or "").strip()
 
-    if not english_text:
+    if not source_text:
         raise HTTPException(status_code=400, detail="No text provided.")
 
-    if len(english_text) > 2000:
+    if len(source_text) > 2000:
         raise HTTPException(status_code=400, detail="Text too long (max 2000 chars).")
 
-    logger.info("TTS request: %s", english_text[:100])
+    logger.info("TTS request: %s", source_text[:100])
 
     try:
-        # Step 1: Translate English → Marathi
-        marathi_text = await translate_english_to_marathi(english_text)
-        logger.info("Translated to Marathi: %s", marathi_text[:100])
+        # Step 1: Translate English → Marathi (skipped when Marathi was given)
+        if request.marathi_text:
+            marathi_text = clean_for_translation(source_text) or source_text
+        else:
+            marathi_text = await translate_english_to_marathi(source_text)
+            logger.info("Translated to Marathi: %s", marathi_text[:100])
 
         if not marathi_text.strip():
             raise HTTPException(status_code=500, detail="Translation returned empty text.")
 
         # Step 2: Synthesize Marathi speech
-        tts_result = await synthesize_marathi_speech(marathi_text)
+        tts_result = await synthesize_marathi_speech(marathi_text, voice=request.voice)
 
         return TextToSpeechResponse(
             marathi_text=marathi_text,
@@ -193,6 +258,133 @@ async def text_to_speech(request: TextToSpeechRequest):
     except Exception as e:
         logger.exception("Unexpected error in text-to-speech")
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
+def _get_llm_client() -> AsyncOpenAI:
+    """Reuse one client so TCP/TLS connections to NVIDIA are kept alive between requests."""
+    global _llm_client
+    if _llm_client is None:
+        _llm_client = AsyncOpenAI(
+            base_url="https://integrate.api.nvidia.com/v1",
+            api_key=os.getenv("NVIDIA_API_KEY"),
+            timeout=LLM_TIMEOUT,
+            max_retries=0,
+        )
+    return _llm_client
+
+
+def _llm_extra_body(model: str) -> dict:
+    # Hybrid-reasoning models (DeepSeek, Nemotron) think by default; thinking
+    # adds many seconds of latency and isn't needed for short advisory answers.
+    if "deepseek" in model or "nemotron" in model:
+        return {"chat_template_kwargs": {"enable_thinking": False}}
+    return {}
+
+
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """
+    Send the farmer's question to the NVIDIA-hosted LLM.
+
+    The LLM answers directly in `reply_language`, which removes the two slow
+    translation hops (MR→EN before the LLM, EN→MR after it).
+    """
+    text = request.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="No text provided.")
+
+    language_name = LANGUAGE_NAMES.get(request.reply_language, "English")
+    logger.info("LLM chat request (%s, reply in %s): %s", LLM_MODEL, language_name, text[:100])
+
+    messages = [
+        {"role": "system", "content": FARMER_SYSTEM_PROMPT.format(language=language_name)},
+        {"role": "user", "content": text},
+    ]
+
+    def complete(model: str):
+        return asyncio.create_task(_get_llm_client().chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=0.5,
+            top_p=0.9,
+            max_tokens=LLM_MAX_TOKENS,
+            extra_body=_llm_extra_body(model),
+        ))
+
+    try:
+        # Hedged request: if the primary model hasn't answered within
+        # LLM_HEDGE_AFTER seconds (free-tier queueing), also ask the fallback
+        # model and use whichever answers first.
+        completion, failed = None, []
+        pending = {complete(LLM_MODEL)}
+        timeout = LLM_HEDGE_AFTER
+        while completion is None:
+            if not pending:
+                raise failed[-1].exception()
+            done, pending = await asyncio.wait(
+                pending, timeout=timeout, return_when=asyncio.FIRST_COMPLETED
+            )
+            for t in done:
+                if t.exception():
+                    failed.append(t)
+                elif completion is None:
+                    completion = t.result()
+            if completion is None and timeout is not None and LLM_FALLBACK_MODEL:
+                logger.warning("LLM %s slow or failed; also trying %s", LLM_MODEL, LLM_FALLBACK_MODEL)
+                pending.add(complete(LLM_FALLBACK_MODEL))
+            timeout = None  # hedge only once; then wait for whichever finishes
+        for t in pending:
+            t.cancel()
+
+        response_text = (completion.choices[0].message.content or "").strip()
+        logger.info("LLM response: %s", response_text[:100])
+        return ChatResponse(response=response_text)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Unexpected error in chat")
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
+@app.post("/api/chats")
+def api_create_chat(request: CreateChatRequest):
+    try:
+        chat_id = create_chat(request.title)
+        return {"chat_id": chat_id, "title": request.title}
+    except Exception as e:
+        logger.exception("Error creating chat")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/chats")
+def api_get_chats():
+    try:
+        chats = get_chats()
+        return {"chats": chats}
+    except Exception as e:
+        logger.exception("Error getting chats")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/chats/{chat_id}/messages")
+def api_get_messages(chat_id: int):
+    try:
+        messages = get_chat_messages(chat_id)
+        return {"messages": messages}
+    except Exception as e:
+        logger.exception("Error getting messages")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/chats/{chat_id}/messages")
+def api_add_message(chat_id: int, request: AddMessageRequest):
+    try:
+        msg_id = add_message(chat_id, request.role, request.msg_type, request.content)
+        return {"message_id": msg_id, "success": True}
+    except Exception as e:
+        logger.exception("Error adding message")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ─── Entry Point ──────────────────────────────────────────────────────────────

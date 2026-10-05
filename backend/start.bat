@@ -17,15 +17,11 @@ if not exist .env (
     exit /b 1
 )
 
-REM ── Remove broken venv if it exists ──────────────────────────
-if exist venv (
-    echo Removing old virtual environment...
-    rmdir /s /q venv
+REM ── Create fresh virtual environment (if not exists) ────────
+if not exist venv (
+    echo Creating Python 3.12 virtual environment...
+    py -3.12 -m venv venv
 )
-
-REM ── Create fresh virtual environment ─────────────────────────
-echo Creating Python virtual environment...
-python -m venv venv
 if errorlevel 1 (
     echo [ERROR] 'python' not found. Please install Python 3.9+ from https://python.org
     pause
@@ -41,7 +37,7 @@ python -m pip install --upgrade pip --quiet
 
 REM ── Install core dependencies ─────────────────────────────────
 echo Installing dependencies (this may take a minute)...
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 if errorlevel 1 (
     echo.
     echo [ERROR] Dependency install failed. See errors above.

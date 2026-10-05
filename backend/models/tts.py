@@ -7,7 +7,10 @@ Returns: base64-encoded WAV audio + word timing list for frontend highlighting
 
 import os
 import io
+import re
+import asyncio
 import logging
+from concurrent.futures import ThreadPoolExecutor
 import base64
 import httpx
 import numpy as np
@@ -55,10 +58,11 @@ VOICE_DESCRIPTIONS = {
 # ─── Local model (lazy loaded) ────────────────────────────────────────────────
 _tts_model = None
 _tts_tokenizer = None
+_desc_tokenizer = None
 
 
 def _load_local_tts():
-    global _tts_model, _tts_tokenizer
+    global _tts_model, _tts_tokenizer, _desc_tokenizer
     if _tts_model is not None:
         return
     try:
@@ -72,6 +76,9 @@ def _load_local_tts():
             _tts_model = ParlerTTSForConditionalGeneration.from_pretrained(
                 TTS_MODEL_ID, token=HF_TOKEN or None
             ).to(DEVICE)
+            _desc_tokenizer = AutoTokenizer.from_pretrained(
+                _tts_model.config.text_encoder._name_or_path, token=HF_TOKEN or None
+            )
             logger.info("TTS model loaded.")
         except ImportError:
             raise RuntimeError(
@@ -82,20 +89,22 @@ def _load_local_tts():
         raise
 
 
-def _synthesize_local(marathi_text: str) -> bytes:
+def _synthesize_local(marathi_text: str, voice: str = None) -> bytes:
     """Synthesize speech locally using Parler-TTS."""
     import torch
     import soundfile as sf
     _load_local_tts()
 
-    voice_desc = VOICE_DESCRIPTIONS.get(TTS_VOICE, VOICE_DESCRIPTIONS["Sunita"])
+    active_voice = voice or TTS_VOICE
+    voice_desc = VOICE_DESCRIPTIONS.get(active_voice, VOICE_DESCRIPTIONS["Sunita"])
     # Prefix with Marathi language tag
     prompt = f"<mr> {marathi_text}"
 
     tokenizer = _tts_tokenizer
+    desc_tokenizer = _desc_tokenizer
     model = _tts_model
 
-    input_ids = tokenizer(voice_desc, return_tensors="pt").input_ids.to(DEVICE)
+    input_ids = desc_tokenizer(voice_desc, return_tensors="pt").input_ids.to(DEVICE)
     prompt_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(DEVICE)
 
     with torch.no_grad():
@@ -109,14 +118,43 @@ def _synthesize_local(marathi_text: str) -> bytes:
     return buf.getvalue()
 
 
-def _synthesize_api(marathi_text: str) -> bytes:
-    """Synthesize speech via gTTS instead of HF Inference API."""
+_tts_pool = ThreadPoolExecutor(max_workers=6)
+
+
+def _split_sentences(text: str, max_len: int = 180) -> list:
+    """Split on sentence punctuation (incl. Devanagari danda), packing short sentences together."""
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?।॥])\s+", text) if s.strip()]
+    chunks, current = [], ""
+    for s in sentences:
+        if current and len(current) + len(s) + 1 > max_len:
+            chunks.append(current)
+            current = s
+        else:
+            current = f"{current} {s}".strip()
+    if current:
+        chunks.append(current)
+    return chunks
+
+
+def _gtts_chunk(text: str) -> bytes:
     from gtts import gTTS
+    buf = io.BytesIO()
+    gTTS(text=text, lang='mr').write_to_fp(buf)
+    return buf.getvalue()
+
+
+def _synthesize_api(marathi_text: str) -> bytes:
+    """Synthesize speech via gTTS.
+
+    gTTS fetches 100-char pieces one after another, so long replies are slow.
+    We split by sentence and fetch the pieces in parallel; MP3 frames can be
+    concatenated directly.
+    """
     try:
-        tts = gTTS(text=marathi_text, lang='mr')
-        buf = io.BytesIO()
-        tts.write_to_fp(buf)
-        return buf.getvalue()
+        chunks = _split_sentences(marathi_text)
+        if len(chunks) <= 1:
+            return _gtts_chunk(marathi_text)
+        return b"".join(_tts_pool.map(_gtts_chunk, chunks))
     except Exception as e:
         logger.error("TTS API error: %s", e)
         raise RuntimeError(f"TTS API failed: {e}")
@@ -154,12 +192,14 @@ def _estimate_word_timings(marathi_text: str, total_duration_s: float) -> list:
 
 
 def _get_audio_duration(audio_bytes: bytes) -> float:
-    """Return a rough estimate based on byte length (gTTS outputs MP3)."""
-    # mp3 bytes length rough estimation
-    return len(audio_bytes) / 4000.0
+    """Estimate duration from byte length (gTTS outputs constant 64 kbps MP3 = 8000 bytes/s)."""
+    if audio_bytes[:4] == b"RIFF":  # local Parler-TTS returns WAV
+        import soundfile as sf
+        return sf.info(io.BytesIO(audio_bytes)).duration
+    return len(audio_bytes) / 8000.0
 
 
-async def synthesize_marathi_speech(marathi_text: str) -> dict:
+async def synthesize_marathi_speech(marathi_text: str, voice: str = None) -> dict:
     """
     Main entry: convert Marathi text to speech.
     Returns: {audio_base64, sample_rate, word_timings, duration}
@@ -170,9 +210,9 @@ async def synthesize_marathi_speech(marathi_text: str) -> dict:
     logger.info("Synthesizing TTS for: %.60s...", marathi_text)
 
     if INFERENCE_MODE == "local":
-        audio_bytes = _synthesize_local(marathi_text)
+        audio_bytes = await asyncio.to_thread(_synthesize_local, marathi_text, voice)
     else:
-        audio_bytes = _synthesize_api(marathi_text)
+        audio_bytes = await asyncio.to_thread(_synthesize_api, marathi_text)
 
     duration = _get_audio_duration(audio_bytes)
     word_timings = _estimate_word_timings(marathi_text, duration)
@@ -182,5 +222,5 @@ async def synthesize_marathi_speech(marathi_text: str) -> dict:
         "audio_base64": audio_b64,
         "word_timings": word_timings,
         "duration": duration,
-        "voice": TTS_VOICE,
+        "voice": voice or TTS_VOICE,
     }

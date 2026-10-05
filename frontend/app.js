@@ -56,6 +56,8 @@ const API = (() => {
     const apiUrl = Config.get("apiUrl");
     const formData = new FormData();
     formData.append("audio", audioBlob, "recording.wav");
+    // The LLM understands Marathi directly — skip the MR→EN translation hop.
+    formData.append("translate", "false");
 
     const response = await fetch(`${apiUrl}/api/speech-to-text`, {
       method: "POST",
@@ -70,12 +72,32 @@ const API = (() => {
     return response.json();
   }
 
-  async function textToSpeech(englishText) {
+  async function textToSpeech(text, voice, isMarathi = false) {
     const apiUrl = Config.get("apiUrl");
     const response = await fetch(`${apiUrl}/api/text-to-speech`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ english_text: englishText }),
+      body: JSON.stringify(
+        isMarathi
+          ? { marathi_text: text, voice: voice }
+          : { english_text: text, voice: voice }
+      ),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || `API Error: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async function chat(text) {
+    const apiUrl = Config.get("apiUrl");
+    const response = await fetch(`${apiUrl}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text, reply_language: "mr" }),
     });
 
     if (!response.ok) {
@@ -94,7 +116,161 @@ const API = (() => {
     return response.json();
   }
 
-  return { speechToText, textToSpeech, healthCheck };
+  async function createChat(title) {
+    const apiUrl = Config.get("apiUrl");
+    const response = await fetch(`${apiUrl}/api/chats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
+    return response.json();
+  }
+
+  async function getChats() {
+    const apiUrl = Config.get("apiUrl");
+    const response = await fetch(`${apiUrl}/api/chats`);
+    return response.json();
+  }
+
+  async function getChatMessages(chatId) {
+    const apiUrl = Config.get("apiUrl");
+    const response = await fetch(`${apiUrl}/api/chats/${chatId}/messages`);
+    return response.json();
+  }
+
+  async function saveMessage(chatId, role, msgType, content) {
+    const apiUrl = Config.get("apiUrl");
+    const response = await fetch(`${apiUrl}/api/chats/${chatId}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role, msg_type: msgType, content }),
+    });
+    return response.json();
+  }
+
+  return { speechToText, textToSpeech, healthCheck, chat, createChat, getChats, getChatMessages, saveMessage };
+})();
+
+/* ─── Chat History ───────────────────────────────────────── */
+const ChatHistory = (() => {
+  let currentChatId = null;
+
+  async function ensureChatId(title) {
+    if (!currentChatId) {
+      try {
+        const chat = await API.createChat(title);
+        currentChatId = chat.chat_id;
+        await loadSidebar();
+      } catch (err) {
+        console.error("Failed to create chat", err);
+      }
+    }
+    return currentChatId;
+  }
+
+  async function loadSidebar() {
+    try {
+      const result = await API.getChats();
+      const list = document.getElementById("chat-list");
+      list.innerHTML = "";
+      for (const chat of result.chats) {
+        const li = document.createElement("li");
+        li.className = "chat-item" + (chat.id === currentChatId ? " active" : "");
+        li.textContent = chat.title;
+        li.addEventListener("click", () => loadChat(chat.id));
+        list.appendChild(li);
+      }
+    } catch (err) {
+      console.error("Failed to load sidebar", err);
+    }
+  }
+
+  async function loadChat(chatId) {
+    currentChatId = chatId;
+    document.getElementById("chat-area").innerHTML = "";
+    
+    // Restore welcome screen just to hide it cleanly when messages load
+    const welcome = document.getElementById("welcome-screen");
+    if (welcome) welcome.classList.add("hidden");
+    
+    await loadSidebar(); // update active class
+    
+    // on mobile, close sidebar
+    document.getElementById("history-sidebar").classList.remove("open");
+    
+    try {
+      const result = await API.getChatMessages(chatId);
+      for (const msg of result.messages) {
+        if (msg.msg_type === "speech_result") {
+          ChatUI.addSpeechResult(msg.content.marathi_text, msg.content.english_text);
+        } else if (msg.msg_type === "user_text") {
+          ChatUI.addUserText(msg.content.english_text);
+        } else if (msg.msg_type === "bot_tts") {
+          // Older chats stored an English reply separately from the Marathi TTS text
+          if (msg.content.ai_response && !msg.content.reply_language) {
+            ChatUI.addBotText("AI Response (English)", msg.content.ai_response);
+          }
+
+          ChatUI.addTTSResult(
+            msg.content.marathi_text,
+            msg.content.word_timings,
+            msg.content.audio_base64,
+            msg.content.voice,
+            msg.content.duration
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load messages", err);
+    }
+  }
+
+  function startNewChat() {
+    currentChatId = null;
+    document.getElementById("chat-area").innerHTML = "";
+    
+    // Add welcome back if exists, or recreate it
+    let welcome = document.getElementById("welcome-screen");
+    if (!welcome) {
+      welcome = document.createElement("div");
+      welcome.className = "welcome-screen";
+      welcome.id = "welcome-screen";
+      welcome.innerHTML = `
+        <div class="welcome-icon" aria-hidden="true">🌾</div>
+        <div>
+          <h1 class="welcome-title">नमस्कार! Speak <span>Marathi</span>,<br />Hear it in <span>English</span></h1>
+          <p class="welcome-subtitle">Hold the mic button and speak in Marathi.<br />Or type English text to hear it spoken in Marathi.</p>
+        </div>
+        <div class="welcome-tips" role="list">
+          <div class="tip-card" role="listitem"><span class="tip-icon">🎙️</span><span>Hold mic &amp; speak <strong>Marathi</strong></span></div>
+          <div class="tip-card" role="listitem"><span class="tip-icon">📝</span><span>Type <strong>English</strong> text</span></div>
+          <div class="tip-card" role="listitem"><span class="tip-icon">🔊</span><span>Tap ↺ to <strong>replay</strong> Marathi speech</span></div>
+        </div>
+      `;
+      document.getElementById("chat-area").appendChild(welcome);
+    } else {
+      welcome.classList.remove("hidden");
+      document.getElementById("chat-area").appendChild(welcome);
+    }
+    
+    loadSidebar();
+    document.getElementById("history-sidebar").classList.remove("open");
+  }
+
+  function init() {
+    document.getElementById("new-chat-btn").addEventListener("click", startNewChat);
+    document.getElementById("sidebar-toggle-btn").addEventListener("click", () => {
+      document.getElementById("history-sidebar").classList.toggle("open");
+    });
+    document.getElementById("sidebar-close-btn").addEventListener("click", () => {
+      document.getElementById("history-sidebar").classList.remove("open");
+    });
+    loadSidebar();
+  }
+
+  function getChatId() { return currentChatId; }
+
+  return { init, ensureChatId, getChatId };
 })();
 
 
@@ -153,6 +329,20 @@ const TTSPlayer = (() => {
     const ctx = _getAudioCtx();
     const bytes = Uint8Array.from(atob(base64Audio), (c) => c.charCodeAt(0));
     _audioBuffer = await ctx.decodeAudioData(bytes.buffer);
+
+    // Scale word timings to match exact decoded audio duration
+    if (_wordTimings.length > 0 && _audioBuffer && _audioBuffer.duration > 0) {
+      const actualDuration = _audioBuffer.duration;
+      // Get the backend's estimated duration from the last word's end time, or 1.0
+      const estimatedDuration = _wordTimings[_wordTimings.length - 1].end || 1.0;
+      const scale = actualDuration / estimatedDuration;
+
+      _wordTimings = _wordTimings.map(w => ({
+        word: w.word,
+        start: w.start * scale,
+        end: w.end * scale
+      }));
+    }
   }
 
   function _startHighlighting(offsetTime = 0) {
@@ -447,6 +637,11 @@ const ChatUI = (() => {
     userMsg.appendChild(userBody);
     _chatArea.appendChild(userMsg);
 
+    if (!englishText) {
+      _scrollToBottom();
+      return { userMsg, botMsg: null };
+    }
+
     // Bot side: English translation bubble
     const botMsg = document.createElement("div");
     botMsg.className = "message bot";
@@ -463,6 +658,27 @@ const ChatUI = (() => {
 
     _scrollToBottom();
     return { userMsg, botMsg };
+  }
+
+  /**
+   * Add a plain bot text bubble (textContent — LLM output is never parsed as HTML)
+   */
+  function addBotText(label, text) {
+    _hideWelcome();
+    const msg = document.createElement("div");
+    msg.className = "message bot";
+    const body = document.createElement("div");
+    body.className = "message-body";
+    body.appendChild(_createLabel(label));
+    const bubble = document.createElement("div");
+    bubble.className = "bubble english-translation";
+    bubble.textContent = text;
+    body.appendChild(bubble);
+    msg.appendChild(_createAvatar("bot"));
+    msg.appendChild(body);
+    _chatArea.appendChild(msg);
+    _scrollToBottom();
+    return msg;
   }
 
   /**
@@ -680,6 +896,7 @@ const ChatUI = (() => {
   return {
     init,
     addSpeechResult,
+    addBotText,
     addUserText,
     addTypingBubble,
     addTTSResult,
@@ -766,6 +983,7 @@ const App = (() => {
 
     ChatUI.init(chatArea, welcomeScreen);
     Settings.init();
+    ChatHistory.init();
 
     // Settings button
     document.getElementById("settings-btn").addEventListener("click", Settings.open);
@@ -840,7 +1058,7 @@ const App = (() => {
       _micBtn.classList.remove("recording");
       _setMicLabel("Tap to speak");
     }
-    
+
     _micStarting = false;
   }
 
@@ -865,6 +1083,45 @@ const App = (() => {
 
       if (result.marathi_text) {
         ChatUI.addSpeechResult(result.marathi_text, result.english_text);
+
+        // Start the LLM call right away; saving history runs alongside it
+        const aiTypingEl = ChatUI.addTypingBubble();
+        const chatPromise = API.chat(result.marathi_text);
+        const historyReady = ChatHistory.ensureChatId(result.marathi_text.substring(0, 30) || "Speech Chat")
+          .then(() => API.saveMessage(ChatHistory.getChatId(), "user", "speech_result", {
+            marathi_text: result.marathi_text,
+            english_text: result.english_text
+          }));
+        try {
+          const chatResult = await chatPromise;
+          const aiResponseText = chatResult.response;
+
+          // Reply is already Marathi, so TTS skips translation
+          const ttsResult = await API.textToSpeech(aiResponseText, Config.get("voice"), true);
+          aiTypingEl.remove();
+
+          ChatUI.addTTSResult(
+            ttsResult.marathi_text,
+            ttsResult.word_timings,
+            ttsResult.audio_base64,
+            ttsResult.voice || Config.get("voice"),
+            ttsResult.duration || 3,
+          );
+
+          await historyReady;
+          await API.saveMessage(ChatHistory.getChatId(), "bot", "bot_tts", {
+            ai_response: aiResponseText,
+            reply_language: "mr",
+            marathi_text: ttsResult.marathi_text,
+            word_timings: ttsResult.word_timings,
+            audio_base64: ttsResult.audio_base64,
+            voice: ttsResult.voice || Config.get("voice"),
+            duration: ttsResult.duration || 3
+          });
+        } catch (err) {
+          aiTypingEl.remove();
+          ChatUI.addError("AI Error: " + err.message);
+        }
       } else {
         ChatUI.addError("No speech detected. Please try again.");
       }
@@ -894,7 +1151,18 @@ const App = (() => {
     const typingEl = ChatUI.addTypingBubble();
 
     try {
-      const result = await API.textToSpeech(text);
+      // Start the LLM call right away; saving history runs alongside it
+      const chatPromise = API.chat(text);
+      const historyReady = ChatHistory.ensureChatId(text.substring(0, 30))
+        .then(() => API.saveMessage(ChatHistory.getChatId(), "user", "user_text", {
+          english_text: text
+        }));
+
+      const chatResult = await chatPromise;
+      const aiResponseText = chatResult.response;
+
+      // Reply is already Marathi, so TTS skips translation
+      const result = await API.textToSpeech(aiResponseText, Config.get("voice"), true);
       typingEl.remove();
 
       ChatUI.addTTSResult(
@@ -904,9 +1172,20 @@ const App = (() => {
         result.voice || Config.get("voice"),
         result.duration || 3,
       );
+
+      await historyReady;
+      await API.saveMessage(ChatHistory.getChatId(), "bot", "bot_tts", {
+        ai_response: aiResponseText,
+        reply_language: "mr",
+        marathi_text: result.marathi_text,
+        word_timings: result.word_timings,
+        audio_base64: result.audio_base64,
+        voice: result.voice || Config.get("voice"),
+        duration: result.duration || 3
+      });
     } catch (err) {
       typingEl.remove();
-      ChatUI.addError(err.message || "Text-to-speech failed.");
+      ChatUI.addError(err.message || "Request failed.");
       Toast.show("Error: " + err.message, "error");
     } finally {
       _isProcessing = false;
