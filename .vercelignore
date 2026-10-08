@@ -1,0 +1,7 @@
+# Ignore backend entirely - Vercel should only deploy the static frontend
+backend/
+stitch_kisanai_smart_farmer_assistant/
+*.py
+*.pyc
+requirements*.txt
+start.bat
