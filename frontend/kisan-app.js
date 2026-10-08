@@ -154,6 +154,67 @@ const VoiceAssistant = (() => {
   let isRecording = false;
   let stream = null;
 
+  function stopAllAudio() {
+    if (typeof TTSPlayer !== 'undefined' && typeof TTSPlayer.stop === 'function') {
+      try { TTSPlayer.stop(); } catch (e) {}
+    }
+    if ('speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+  }
+
+  function extractReply(resp) {
+    if (!resp) return '';
+    if (typeof resp === 'string') return resp.trim();
+    if (resp.response && typeof resp.response === 'string') return resp.response.trim();
+    if (resp.marathi_text && typeof resp.marathi_text === 'string') return resp.marathi_text.trim();
+    if (resp.reply && typeof resp.reply === 'string') return resp.reply.trim();
+    if (resp.text && typeof resp.text === 'string') return resp.text.trim();
+    if (resp.message && typeof resp.message === 'string') return resp.message.trim();
+    return '';
+  }
+
+  async function playBotSpeech(text) {
+    if (!text) return;
+    try {
+      if (typeof API !== 'undefined' && typeof API.textToSpeech === 'function') {
+        const voice = (typeof Config !== 'undefined' && Config.get('voice')) || 'Sunita';
+        statusText.textContent = '🔊 Synthesizing speech...';
+        const tts = await API.textToSpeech(text, voice, true);
+        if (tts && tts.audio_base64 && typeof TTSPlayer !== 'undefined') {
+          statusText.textContent = '🔊 Speaking...';
+          await TTSPlayer.load(tts.audio_base64, tts.word_timings || [], {
+            onEnd: () => {
+              statusText.textContent = 'Hold the button and speak in Marathi, Hindi, or English';
+            }
+          });
+          TTSPlayer.play();
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Backend TTS skipped or failed, trying browser speech synthesis:', e);
+    }
+
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'mr-IN';
+        statusText.textContent = '🔊 Speaking...';
+        utterance.onend = () => {
+          statusText.textContent = 'Hold the button and speak in Marathi, Hindi, or English';
+        };
+        utterance.onerror = () => {
+          statusText.textContent = 'Hold the button and speak in Marathi, Hindi, or English';
+        };
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn('SpeechSynthesis error:', err);
+      }
+    }
+  }
+
   function open() {
     if (!overlay) return;
     overlay.classList.remove('hidden');
@@ -168,9 +229,11 @@ const VoiceAssistant = (() => {
     overlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     if (isRecording) stopRecording();
+    stopAllAudio();
   }
 
   function startRecording() {
+    stopAllAudio();
     if (typeof SpeechInput === 'undefined') {
       addBotMessage("Voice recording is not available. Please type your question.");
       return;
@@ -187,28 +250,50 @@ const VoiceAssistant = (() => {
         transcript.textContent = text;
       },
       onFinal: async (blob) => {
-        statusText.textContent = 'Processing...';
+        statusText.textContent = 'Processing speech...';
+        const typingEl = addTypingIndicator();
         try {
           const result = await API.speechToText(blob);
           const userText = result.marathi_text || result.text || '';
           const englishText = result.english_text || '';
+          const liveText = transcript ? transcript.textContent.trim() : '';
+          const queryText = userText || liveText || englishText;
 
-          if (userText) {
-            addUserMessage(userText);
-            transcript.textContent = '';
-          }
-
-          if (englishText || userText) {
+          if (queryText) {
+            addUserMessage(queryText);
+            if (transcript) transcript.textContent = '';
             statusText.textContent = 'Generating response...';
-            const chatResp = await API.chat(englishText || userText);
-            const replyText = chatResp.marathi_text || chatResp.reply || chatResp.text || '';
-            if (replyText) addBotMessage(replyText);
+
+            const chatResp = await API.chat(queryText);
+            const replyText = extractReply(chatResp);
+            typingEl.remove();
+
+            if (replyText) {
+              addBotMessage(replyText, true);
+              if (typeof ChatHistory !== 'undefined' && typeof API.saveMessage === 'function') {
+                ChatHistory.ensureChatId(queryText.substring(0, 30) || 'Speech Chat')
+                  .then((cId) => {
+                    if (cId) {
+                      API.saveMessage(cId, 'user', 'speech_result', { marathi_text: queryText, english_text: englishText });
+                      API.saveMessage(cId, 'bot', 'bot_tts', { ai_response: replyText, reply_language: 'mr', marathi_text: replyText });
+                    }
+                  })
+                  .catch(() => {});
+              }
+            } else {
+              addBotMessage('मला उत्तर सापडले नाही. (I could not find an answer.)');
+            }
+          } else {
+            typingEl.remove();
+            statusText.textContent = 'No speech detected. Please try again.';
           }
         } catch (err) {
+          typingEl.remove();
           addBotMessage("माफ करा, एक त्रुटी झाली. कृपया पुन्हा प्रयत्न करा. (Sorry, an error occurred. Please try again.)");
           console.error('Voice processing error:', err);
         } finally {
           statusText.textContent = 'Hold the button and speak in Marathi, Hindi, or English';
+          stopRecordingUI();
         }
       },
       onError: (msg) => {
@@ -233,24 +318,42 @@ const VoiceAssistant = (() => {
   }
 
   async function sendText() {
+    stopAllAudio();
     const text = textInput.value.trim();
     if (!text) return;
     textInput.value = '';
     addUserMessage(text);
     statusText.textContent = 'Generating response...';
+    const typingEl = addTypingIndicator();
 
     try {
-      let resp;
       if (typeof API !== 'undefined') {
-        resp = await API.chat(text);
-        const reply = resp.marathi_text || resp.reply || resp.text || '';
-        if (reply) addBotMessage(reply);
-        else addBotMessage('मला उत्तर सापडले नाही. (I could not find an answer.)');
+        const resp = await API.chat(text);
+        const reply = extractReply(resp);
+        typingEl.remove();
+
+        if (reply) {
+          addBotMessage(reply, true);
+          if (typeof ChatHistory !== 'undefined' && typeof API.saveMessage === 'function') {
+            ChatHistory.ensureChatId(text.substring(0, 30) || 'Kisan AI Chat')
+              .then((cId) => {
+                if (cId) {
+                  API.saveMessage(cId, 'user', 'user_text', { english_text: text });
+                  API.saveMessage(cId, 'bot', 'bot_tts', { ai_response: reply, reply_language: 'mr', marathi_text: reply });
+                }
+              })
+              .catch(() => {});
+          }
+        } else {
+          addBotMessage('मला उत्तर सापडले नाही. (I could not find an answer.)');
+        }
       } else {
-        // Fallback mock
+        typingEl.remove();
         addBotMessage('Kisan AI is connecting to the backend. Please ensure the backend server is running.');
       }
     } catch (err) {
+      typingEl.remove();
+      console.error('Chat error:', err);
       addBotMessage('माफ करा, सर्व्हरशी कनेक्ट होता आले नाही. (Could not connect to server.)');
     } finally {
       statusText.textContent = 'Hold the button and speak in Marathi, Hindi, or English';
@@ -265,12 +368,42 @@ const VoiceAssistant = (() => {
     chat.scrollTop = chat.scrollHeight;
   }
 
-  function addBotMessage(text) {
+  function addBotMessage(text, autoPlay = false) {
     const msg = document.createElement('div');
     msg.className = 'voice-chat-msg voice-chat-msg--bot';
-    msg.textContent = text;
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'voice-chat-msg__text';
+    textSpan.textContent = text;
+    msg.appendChild(textSpan);
+
+    const playBtn = document.createElement('button');
+    playBtn.type = 'button';
+    playBtn.className = 'voice-msg-play-btn';
+    playBtn.title = 'Replay speech';
+    playBtn.setAttribute('aria-label', 'Replay speech');
+    playBtn.innerHTML = '🔊';
+    playBtn.onclick = (e) => {
+      e.stopPropagation();
+      playBotSpeech(text);
+    };
+    msg.appendChild(playBtn);
+
     chat.appendChild(msg);
     chat.scrollTop = chat.scrollHeight;
+
+    if (autoPlay) {
+      playBotSpeech(text);
+    }
+  }
+
+  function addTypingIndicator() {
+    const msg = document.createElement('div');
+    msg.className = 'voice-chat-msg voice-chat-msg--bot typing';
+    msg.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
+    return msg;
   }
 
   function init() {

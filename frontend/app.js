@@ -170,8 +170,9 @@ const ChatHistory = (() => {
 
   async function loadSidebar() {
     try {
-      const result = await API.getChats();
       const list = document.getElementById("chat-list");
+      if (!list) return;
+      const result = await API.getChats();
       list.innerHTML = "";
       for (const chat of result.chats) {
         const li = document.createElement("li");
@@ -187,7 +188,9 @@ const ChatHistory = (() => {
 
   async function loadChat(chatId) {
     currentChatId = chatId;
-    document.getElementById("chat-area").innerHTML = "";
+    const chatArea = document.getElementById("chat-area");
+    if (!chatArea) return;
+    chatArea.innerHTML = "";
     
     // Restore welcome screen just to hide it cleanly when messages load
     const welcome = document.getElementById("welcome-screen");
@@ -196,7 +199,8 @@ const ChatHistory = (() => {
     await loadSidebar(); // update active class
     
     // on mobile, close sidebar
-    document.getElementById("history-sidebar").classList.remove("open");
+    const historySidebar = document.getElementById("history-sidebar");
+    if (historySidebar) historySidebar.classList.remove("open");
     
     try {
       const result = await API.getChatMessages(chatId);
