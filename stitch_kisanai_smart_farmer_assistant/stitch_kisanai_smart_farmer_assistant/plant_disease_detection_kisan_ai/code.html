@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@100..900&family=Bricolage+Grotesque:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"surface-dim":"#cfded4","on-tertiary-fixed-variant":"#2d4d3c","inverse-primary":"#ebbcac","tertiary":"#2c4c3b","on-primary-fixed":"#2e150b","on-primary":"#ffffff","tertiary-fixed-dim":"#abcfb8","tertiary-container":"#446452","surface-variant":"#d7e6dc","on-background":"#111e18","secondary-fixed-dim":"#95d4b3","surface-container-low":"#e8f7ed","secondary-container":"#aeeecb","surface-bright":"#eefdf3","background":"#eefdf3","on-tertiary":"#ffffff","tertiary-fixed":"#c7ebd4","surface-tint":"#7a5649","error":"#ba1a1a","on-secondary":"#ffffff","on-surface-variant":"#504440","on-secondary-fixed-variant":"#0e5138","primary-fixed":"#ffdbcf","on-secondary-container":"#316e52","on-error-container":"#93000a","on-secondary-fixed":"#002114","secondary":"#2c694e","primary-fixed-dim":"#ebbcac","surface":"#eefdf3","inverse-on-surface":"#e5f4ea","on-primary-container":"#fdcdbc","surface-container-high":"#ddece2","secondary-fixed":"#b1f0ce","primary-container":"#795548","surface-container":"#e2f2e7","surface-container-highest":"#d7e6dc","surface-container-lowest":"#ffffff","outline":"#82746f","on-tertiary-container":"#bbdfc8","on-tertiary-fixed":"#002113","on-surface":"#111e18","primary":"#5f3e32","outline-variant":"#d4c3bd","error-container":"#ffdad6","on-error":"#ffffff","inverse-surface":"#26332d","on-primary-fixed-variant":"#603f33"},"borderRadius":{"DEFAULT":"1rem","lg":"2rem","xl":"3rem","full":"9999px"},"spacing":{"space-sm":"0.75rem","space-xs":"0.375rem","gutter-desktop":"1.5rem","margin-desktop":"2rem","margin":"1rem","gutter":"1rem","space-xl":"2.5rem","space-md":"1.25rem","space-lg":"1.75rem"},"fontFamily":{"body-lg":["Atkinson Hyperlegible Next"],"body-md":["Atkinson Hyperlegible Next"],"display":["Bricolage Grotesque"],"label-md":["Atkinson Hyperlegible Next"],"headline-md":["Bricolage Grotesque"],"headline-sm":["Bricolage Grotesque"],"body-sm":["Atkinson Hyperlegible Next"],"label-sm":["Atkinson Hyperlegible Next"],"headline-lg-mobile":["Bricolage Grotesque"],"label-lg":["Atkinson Hyperlegible Next"],"headline-lg":["Bricolage Grotesque"],"display-mobile":["Bricolage Grotesque"]},"fontSize":{"body-lg":["1.125rem",{"lineHeight":"1.75rem","fontWeight":"400"}],"body-md":["1rem",{"lineHeight":"1.5rem","fontWeight":"400"}],"display":["2.75rem",{"lineHeight":"3.25rem","letterSpacing":"-0.02em","fontWeight":"800"}],"label-md":["0.9375rem",{"lineHeight":"1.375rem","fontWeight":"600"}],"headline-md":["1.375rem",{"lineHeight":"1.875rem","fontWeight":"700"}],"headline-sm":["1.125rem",{"lineHeight":"1.625rem","fontWeight":"600"}],"body-sm":["0.875rem",{"lineHeight":"1.375rem","fontWeight":"400"}],"label-sm":["0.8125rem",{"lineHeight":"1.125rem","letterSpacing":"0.02em","fontWeight":"600"}],"headline-lg-mobile":["1.625rem",{"lineHeight":"2.125rem","letterSpacing":"0em","fontWeight":"700"}],"label-lg":["1.0625rem",{"lineHeight":"1.5rem","letterSpacing":"0.01em","fontWeight":"700"}],"headline-lg":["2rem",{"lineHeight":"2.5rem","letterSpacing":"-0.01em","fontWeight":"700"}],"display-mobile":["2.125rem",{"lineHeight":"2.5rem","letterSpacing":"-0.01em","fontWeight":"800"}]}}}}</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 max-w-[1200px] mx-auto px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #795548
+- Font: bricolageGrotesque
+- Mode: light
+- Roundness: rounded-full
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WkAnaroU7h9-tR_3gjqDg2co6BBjitDceW0rPxTAvqFPJCFh5W66M7XEZxX_zC_XGus6W-747cabUTAHnPyVY-ClSGWZwCRSxR-MiArLzL0Z7fGjApRdsHGXf7afBQfLYE1QVOrvaJSCXsYpwIiqnmHahYy3PDnkZNtmKTMv8E3OnA20PXKs8anOoAVOUF9bzoRa-oNhPkHuI5MB4nKcCyDWFEzMfOycfh7Zahsf3M8_MxiKx8Vll0FA"/><a class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight" data-path="overview" href="#">Kisan AI</a></div><nav class="hidden xl:flex items-center gap-space-md" data-active-classes="bg-secondary text-on-secondary font-label-md rounded-full px-space-sm py-space-xs"><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="overview" href="#">Overview</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="crop-intelligence" href="#">Crop Intelligence</a><a aria-current="page" class="transition-colors bg-secondary text-on-secondary font-label-md rounded-full px-space-sm py-space-xs" data-path="disease-detection" href="#">Disease Detection</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="weather-platform" href="#">Weather Platform</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="technology" href="#">Technology</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="contact" href="#">Contact</a></nav><div class="flex items-center gap-space-sm"><a class="hidden sm:inline-flex items-center justify-center min-h-[52px] px-space-md bg-secondary hover:bg-tertiary text-on-secondary font-label-lg text-label-lg rounded-full transition-all duration-200 shadow-[0_3px_12px_-2px_rgba(121,85,72,0.08)]" data-path="contact" href="#"><span class="material-symbols-outlined mr-space-xs text-[20px]">psychology</span>Explore Platform</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-background"><div class="flex flex-col w-full">
+<!-- Offline Alert / Field Synced Banner -->
+<div class="w-full bg-primary text-on-primary px-margin-desktop py-space-sm flex flex-col sm:flex-row items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary-fixed text-[24px]">wifi_tethering</span>
+<p class="font-label-sm text-label-sm tracking-wide uppercase font-semibold">Edge Mobile Pathology Engine v4.2 • Offline Cache Active (Maharashtra & Deccan Zone)</p>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-surface-container-low">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></span> Low-Latency Latent Inference
+      </span>
+<span class="text-surface-variant font-label-sm text-label-sm hidden md:inline">2.4 MB Model Footprint</span>
+</div>
+</div>
+<!-- Hero Header Section -->
+<section class="w-full max-w-[1200px] mx-auto px-margin-desktop pt-space-xl pb-space-lg">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-end">
+<div class="lg:col-span-8 flex flex-col gap-space-sm">
+<div class="inline-flex items-center gap-space-xs self-start px-space-sm py-1 bg-surface-container-high rounded-full text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]">biotech</span>
+<span>Field Agropathology & Spatial Vision</span>
+</div>
+<h1 class="font-display text-display text-on-surface tracking-tight">Computer Vision Plant Pathology</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+          Instant crop disease detection and diagnosis directly from smartphone photos, trained on regional crop cultivars under extreme field sunlight conditions.
+        </p>
+</div>
+<div class="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-space-sm justify-end">
+<div class="bg-surface-container p-space-md rounded-lg flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">document_scanner</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface">340,000+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Validated Foliar & Fruit Scans</div>
+</div>
+</div>
+<div class="bg-surface-container p-space-md rounded-lg flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface">96.8% F1 Score</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Sub-Tropical Cultivar Precision</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Camera / Upload Playground Simulator -->
+<section class="w-full max-w-[1200px] mx-auto px-margin-desktop py-space-md">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col lg:flex-row gap-space-xl items-center justify-between">
+<div class="flex-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Field Simulator</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mt-1 mb-space-xs">Test Live Foliar Diagnostic</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+          Simulate a camera snapshot under midday glare. The model segments necrotic regions and checks for fungal spores or bacterial exudates in milliseconds.
+        </p>
+<div class="flex flex-wrap gap-space-sm">
+<label class="cursor-pointer inline-flex items-center justify-center min-h-[56px] px-space-lg bg-secondary hover:bg-tertiary text-on-secondary font-label-lg text-label-lg rounded-full transition-all shadow-md">
+<span class="material-symbols-outlined mr-space-xs text-[24px]">photo_camera</span>
+<span>Simulate Live Lens</span>
+<input accept="image/*" class="hidden" id="lensInput" type="file"/>
+</label>
+<button class="inline-flex items-center justify-center min-h-[56px] px-space-lg bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-lg text-label-lg rounded-full transition-all" onclick="selectCrop('pomegranate')">
+<span class="material-symbols-outlined mr-space-xs text-[20px]">psychology</span>
+<span>Load Reference Orchard Scan</span>
+</button>
+</div>
+</div>
+<div class="w-full lg:w-96 bg-surface-container-low p-space-md rounded-lg flex flex-col gap-space-sm">
+<div class="flex justify-between items-center text-on-surface font-label-md text-label-md pb-space-xs">
+<span>Camera Pre-Processing</span>
+<span class="text-secondary font-bold">Autofocus Ready</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px]">light_mode</span>
+<span>Adaptive Glare Suppression (Anti-Sunlight)</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px]">crop_free</span>
+<span>Multi-Scale Leaf ROI Bounding Active</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px]">speed</span>
+<span>Inference Speed: ~180ms On-Device</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Neural Network Visual Pipeline -->
+<section class="w-full max-w-[1200px] mx-auto px-margin-desktop py-space-xl">
+<div class="mb-space-lg">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Edge Diagnostic Architecture</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mt-1">Four-Stage Agronomic Vision Pipeline</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs max-w-3xl">
+        Designed to circumvent network dropouts across agrarian belts, our pruned convolutional backbone processes leaves, shoots, and fruit rind directly on the handset.
+      </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter-desktop">
+<!-- Step 1 -->
+<div class="bg-surface-container p-space-lg rounded-xl flex flex-col justify-between relative group hover:shadow-lg transition-all duration-300">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-12 h-12 rounded-full bg-surface-container-highest text-primary font-headline-sm text-headline-sm flex items-center justify-center">01</span>
+<span class="material-symbols-outlined text-primary text-[28px]">add_a_photo</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Foliar Capture</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Direct high-luminance sensor ingest. Image stabilization neutralizes wind-induced leaf vibration in open field parameters.
+          </p>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-high p-space-xs rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Sensor Matrix</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">1080p RGB + Macro Focal Auto-Lock</span>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container p-space-lg rounded-xl flex flex-col justify-between relative group hover:shadow-lg transition-all duration-300">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-12 h-12 rounded-full bg-surface-container-highest text-primary font-headline-sm text-headline-sm flex items-center justify-center">02</span>
+<span class="material-symbols-outlined text-secondary text-[28px]">filter_center_focus</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">ROI Segmentation</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            U-Net semantic mask decouples background soil, irrigation piping, and farmer fingers, focusing cleanly on symptomatic leaf parenchyma.
+          </p>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-high p-space-xs rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Masking Resolution</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">512×512 Sub-pixel Polygon Contours</span>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container p-space-lg rounded-xl flex flex-col justify-between relative group hover:shadow-lg transition-all duration-300">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-12 h-12 rounded-full bg-surface-container-highest text-primary font-headline-sm text-headline-sm flex items-center justify-center">03</span>
+<span class="material-symbols-outlined text-secondary text-[28px]">neurology</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">CNN Classification</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Pruned MobileNet-V4 architecture extracts lesion morphology, chlorosis gradients, oily spots, and fruiting fungal bodies.
+          </p>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-high p-space-xs rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Pathology Library</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">124 Fungal, Bacterial & Viral Classes</span>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="bg-surface-container p-space-lg rounded-xl flex flex-col justify-between relative group hover:shadow-lg transition-all duration-300">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="w-12 h-12 rounded-full bg-surface-container-highest text-primary font-headline-sm text-headline-sm flex items-center justify-center">04</span>
+<span class="material-symbols-outlined text-primary text-[28px]">assignment_turned_in</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Action Plan & Audio</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Translates probabilistic weights into precise agrochemical dosage, withholding periods, and vernacular vocal directions.
+          </p>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-high p-space-xs rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Output Delivery</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Bilingual Text + Offline TTS Audio</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Real-World Diagnostic Case Study -->
+<section class="w-full max-w-[1200px] mx-auto px-margin-desktop py-space-xl">
+<div class="bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden">
+<!-- Diagnostic Header Bar -->
+<div class="bg-surface-container-high p-space-md flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-error"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Field Case: Solapur Pomegranate Orchard (डाळिंब)</span>
+<span class="px-space-sm py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">CRITICAL ADVISORY</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+<span>Scan ID: #MH-2490-BLIGHT</span>
+<span>•</span>
+<span>Cultivar: Bhagwa (भगवा)</span>
+</div>
+</div>
+<!-- Main Case Study Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop p-space-lg">
+<!-- Visual Telemetry & Image Detection Frame -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<div class="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A macro scientific close-up photograph of a pomegranate fruit on a tree in Maharashtra with dark brown water-soaked angular lesions characteristic of bacterial blight or oily spot disease. Crisp bright natural sunlight illuminates the deep red and pale skin of the fruit, sharp high contrast textures, and clear diagnostic leaf markings in earthy agrarian loam tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAIxt_-lMmDGnJm4rQPAs3LWLmHuOvaP0G_ri0TQO0eaDmXy1YkVlO4Ixhp_c6vprYMJB_VYAWXqL7LYoueihU3wZMCLxU2l6DPfdcbVvI8_Xb5CqbkJktk8nGQf--2dWy8VMvQxJvWbmTAjUNX1Q8cYJ45vqu-OEV3CzfJx7kpUY07SBBs8D-UfkFJapPPa-B2P6DDHE3tZREkBLv7iu58lGRdlELLG5JJaAHVA"/>
+<!-- Bounding Box Overlay Simulation -->
+<div class="absolute inset-0 p-space-md pointer-events-none flex flex-col justify-between">
+<div class="self-end bg-inverse-surface/90 text-inverse-on-surface px-space-sm py-1 rounded-full font-label-sm text-label-sm backdrop-blur-sm">
+                Confidence: 94.2%
+              </div>
+<div class="w-3/5 h-1/2 mx-auto rounded-lg shadow-[0_0_0_2px_#ba1a1a] relative flex items-start justify-end p-1">
+<span class="bg-error text-on-error font-label-sm text-label-sm px-2 py-0.5 rounded">Xanthomonas axonopodis pv. punicae</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container-highest/95 p-space-sm rounded-lg text-on-surface">
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-secondary text-[20px]">center_focus_strong</span>
+<span>Morphology: Angular Water-Soaked Oily Spots (तेल्या)</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-error">Severe Progression (Stage 3)</span>
+</div>
+</div>
+</div>
+<!-- Audio Advisory Component -->
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<button class="w-14 h-14 rounded-full bg-secondary hover:bg-tertiary text-on-secondary flex items-center justify-center shrink-0 shadow-md transition-transform active:scale-95" id="audioPlayBtn" onclick="toggleAudioAdvisory()">
+<span class="material-symbols-outlined text-[28px]" id="playIcon">volume_up</span>
+</button>
+<div>
+<div class="flex items-center gap-space-xs">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">ध्वनी सल्ला (Voice Guidance)</h4>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded-full">Marathi & Hindi</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Listen to spoken dosage instructions, pruning hygiene, and morning spray window.</p>
+</div>
+</div>
+<!-- Language Toggle Pill -->
+<div class="flex items-center bg-surface-container-high rounded-full p-1 shrink-0">
+<button class="px-space-sm py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm transition-all" id="langMr" onclick="setLanguage('mr')">मराठी (MR)</button>
+<button class="px-space-sm py-1 rounded-full text-on-surface-variant font-label-sm text-label-sm transition-all" id="langHi" onclick="setLanguage('hi')">हिन्दी (HI)</button>
+</div>
+</div>
+<!-- Audio Transcript Drawer -->
+<div class="bg-surface-container-low p-space-md rounded-lg text-on-surface-variant font-body-sm text-body-sm leading-relaxed" id="transcriptText">
+<span class="font-bold text-on-surface block mb-1">मराठी ऑडिओ सारांश:</span>
+            "शेतकरी बंधूंनो, डाळिंबावरील तेल्या रोगाचा (Bacterial Blight) प्रादुर्भाव ९४% आढळला आहे. बाधित फांद्या तत्काळ २ इंच खाली कापून नष्ट करा. स्वच्छ सूर्यप्रकाशात कॉपर ऑक्सिक्लोराईड २.५ ग्रॅम प्रति लिटर पाण्यात मिसळून तात्काळ फवारणी करा. झाडांच्या बुंध्याजवळ पाणी साचू देऊ नका."
+          </div>
+</div>
+<!-- 3-Step Farmer Intervention Protocol -->
+<div class="lg:col-span-5 flex flex-col justify-between gap-space-md">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<h3 class="font-headline-md text-headline-md text-on-surface">Immediate Intervention Plan</h3>
+<span class="text-secondary font-label-sm text-label-sm font-semibold">Triage Window: 48 Hours</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+              Follow this clinical protocol to arrest secondary spread across adjoining blocks of your orchard.
+            </p>
+<div class="flex flex-col gap-space-md">
+<!-- Action Step 1 -->
+<div class="bg-surface-container p-space-md rounded-lg flex items-start gap-space-md">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 font-headline-sm text-headline-sm">
+                  1
+                </div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-0.5">Surgical Pruning & Sanitation</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Prune diseased twigs at least 5cm below the necrotic margins. Disinfect shears with 1% Sodium Hypochlorite after each cut. Burn clippings off-site.
+                  </p>
+</div>
+</div>
+<!-- Action Step 2 -->
+<div class="bg-surface-container p-space-md rounded-lg flex items-start gap-space-md">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 font-headline-sm text-headline-sm">
+                  2
+                </div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-0.5">Micro-Canopy Drainage Correction</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Reduce micro-sprinkler intervals. Excessive humidity above 82% accelerates flagellar bacterial invasion. Elevate root-zone trenches to eliminate stagnant runoff.
+                  </p>
+</div>
+</div>
+<!-- Action Step 3 -->
+<div class="bg-surface-container p-space-md rounded-lg flex items-start gap-space-md">
+<div class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0 font-headline-sm text-headline-sm">
+                  3
+                </div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-0.5">Targeted Bactericide Spray Schedule</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Apply <strong>Copper Oxychloride (COC 50% WP)</strong> @ 2.5g/L combined with <strong>Streptocycline</strong> @ 0.5g/L. Spray during early morning (6:30 - 9:00 AM) prior to thermal wind.
+                  </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Prescription Verification Box -->
+<div class="bg-surface-container-high p-space-md rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[24px]">verified_user</span>
+<div>
+<div class="font-label-md text-label-md text-on-surface">ICAR-NRCP Standard Protocol</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Vetted by Agronomic Advisory Council</div>
+</div>
+</div>
+<button class="px-space-sm py-2 bg-secondary text-on-secondary rounded-full font-label-sm text-label-sm hover:bg-tertiary transition-all" onclick="alert('Exporting PDF Diagnostic Report for Local Agrochemical Dealer...')">
+              Download Sheet
+            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Diagnostic Confidence Matrix & Inline Charts -->
+<section class="w-full max-w-[1200px] mx-auto px-margin-desktop py-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop">
+<!-- Accuracy & Latency Metric Bento -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Field-Trained Edge Weights</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1 mb-space-md">Spectral Confusion Matrix</h3>
+<div class="flex flex-col gap-space-sm">
+<div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface mb-1">
+<span>Bacterial Blight (तेल्या)</span>
+<span class="font-bold text-secondary">94.2% Match</span>
+</div>
+<div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 94.2%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface mb-1">
+<span>Anthracnose (करपा)</span>
+<span class="text-on-surface-variant">3.6% Likelihood</span>
+</div>
+<div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-surface-variant rounded-full" style="width: 3.6%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface mb-1">
+<span>Cercospora Spot</span>
+<span class="text-on-surface-variant">1.4% Likelihood</span>
+</div>
+<div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-surface-variant rounded-full" style="width: 1.4%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface mb-1">
+<span>Sunscald Physiological Discoloration</span>
+<span class="text-on-surface-variant">0.8% Likelihood</span>
+</div>
+<div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-surface-variant rounded-full" style="width: 0.8%"></div>
+</div>
+</div>
+</div>
+<div class="mt-space-lg pt-space-md bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ground Truth Verification</span>
+<span class="font-label-sm text-label-sm text-secondary font-bold">Mahatma Phule Krishi Vidyapeeth Vetted</span>
+</div>
+</div>
+<div class="bg-primary text-on-primary p-space-lg rounded-xl shadow-md flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[28px]">flare</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-primary mb-1">Anti-Glare Daylight Shutter</h4>
+<p class="font-body-sm text-body-sm text-surface-container-low">
+              Proprietary histogram equalization counteracts intense midday sunlight reflections on waxy leaves, preserving subtle necrotic boundaries.
+            </p>
+</div>
+</div>
+</div>
+<!-- Live Interactive Comparison Slider & Leaf Anomaly Visualizer -->
+<div class="lg:col-span-7 bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col justify-between">
+<div>
+<div class="flex flex-wrap items-center justify-between gap-space-xs mb-space-md">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Spatial Pathology Heatmap</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Lesion Boundary Extraction</h3>
+</div>
+<div class="flex gap-2">
+<span class="px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">CAM Activation</span>
+<span class="px-space-sm py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">Pixel Grad-CAM</span>
+</div>
+</div>
+<!-- Simulated Leaf Cross-Section Comparison Graphic -->
+<div class="relative w-full h-64 rounded-lg overflow-hidden bg-surface-container-highest flex items-center justify-center mb-space-md">
+<img class="w-full h-full object-cover" data-alt="A split scientific laboratory visual of a healthy green plant leaf juxtaposed against a leaf exhibiting brown fungal rust spots and chlorosis, analyzed under botanical fluorescent inspection lights with sharp macro textural details in rich natural green and soil loam tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBrV4XaGJycwWg-G_aZ3-cqnInUzJVD6BJJH81Jrob43TVtAWcJvZG0hA1BvWMXVNp6j0Q-j1X0vnT4acz3u39eWPZFNM3UzxZZBcNbs815bfTZhHBCnHNiXue_nI7ICp-HY0JknY9gBxIW_EiVyhkyFlaEUTP9PsoRT5HzQXb-Lf8dX4ML0FB2OMwZae73iAI5JUut2FKhD_jQ9SOH-afU1uOKtrLUJ_MTPe_mg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex items-end p-space-md">
+<div class="flex justify-between w-full items-center text-inverse-on-surface">
+<span class="font-label-md text-label-md">Foliar Micro-Stomata Scanner</span>
+<span class="font-label-sm text-label-sm bg-secondary px-space-sm py-0.5 rounded-full">Cell Wall Degradation Flagged</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm text-center">
+<div class="bg-surface-container-low p-space-sm rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Lesion Area</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">18.4%</span>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Pathogen Class</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Bacterial</span>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Yield Loss Risk</span>
+<span class="font-headline-sm text-headline-sm text-error font-bold">High (35-40%)</span>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span>Trained on 42,000+ local regional geo-tagged photos</span>
+<span class="text-secondary font-bold">Auto-updated via Krishi Vigyan Kendra</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Supported Regional Crops Coverage Grid -->
+<section class="w-full max-w-[1200px] mx-auto px-margin-desktop py-space-xl">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between mb-space-lg gap-space-sm">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Extensive Agronomic Catalog</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mt-1">Supported Regional Crop Cultivars</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 max-w-xl">
+          Curated models tuned for the endemic weather cycles, soil compositions, and seasonal blights of Deccan and Northern crop belts.
+        </p>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary">verified</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">7 Core Cash & Food Crops</span>
+</div>
+</div>
+<!-- Crops Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter-desktop">
+<!-- Crop 1: Pomegranate -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="w-full h-36 rounded-lg overflow-hidden mb-space-sm bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A lush healthy branch of a pomegranate tree with ripe red fruits hanging under warm golden sunlight in a clean rural orchard, sharp details of waxy leaves and earthy agricultural landscape." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxBzj_FD6gSVwAf-CTq1o1eMagpnYvRtxAB8zyca7b9ab93N10vthCrbNKrt7svWytJxZeIIpTJKtkaQzZTmMsiMT9YQMzZqZAWLbGyNRfPm3pOQClfILRNw4Xg79U-YlSZ9AVGCYgHn2Yc1aq-uCDvCyLWEGV0aOHSoAAi-gY73vPKLKpxP-1fp3Ct4_aS_ecZia1GDtTgXBLeElg6GhNZKewavcZ9xcFpSR-Cw"/>
+</div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Pomegranate (डाळिंब)</h3>
+<span class="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface">Bhagwa</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+            Primary focus on early-stage bacterial spot and post-monsoon fruit rot control.
+          </p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">Bacterial Blight (तेल्या)</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Anthracnose</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Cercospora</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex justify-between items-center font-label-sm text-label-sm text-secondary">
+<span>98.1% Validation</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Crop 2: Grapes -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="w-full h-36 rounded-lg overflow-hidden mb-space-sm bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Vineyard grape vines with lush green foliage and growing clusters of green grapes in Nashik Maharashtra under bright natural sunlight with crisp natural lighting and agrarian details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXbMeFlaW2Vb9oi4Fbtu0fL4PTcIi0GJXXuaTdQX8618ExwV_F8cg4EnWGgBxgwLI9hlUr0TGDZI5M9bFnTKwgvMUnOOfpv74HdYb4UyCxfXnC9h6KQNkCnUfGijoeFZwqoYAXCQ3fbtg1qJiGhOoV324WHCwMb5BTvspuNVxPv6rDMITCm0V-yjKCSpWtoVUrKhm3ZUzUi5LZsjobwnHWh_OXpPuHBXfjYd8lJQ"/>
+</div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Grapes (द्राक्षे)</h3>
+<span class="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface">Thompson Seedless</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+            Targeting humidity-triggered mildew before clusters form berry cracking.
+          </p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">Downy Mildew (केवडा)</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Powdery Mildew</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Anthracnose</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex justify-between items-center font-label-sm text-label-sm text-secondary">
+<span>97.4% Validation</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Crop 3: Tomato -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="w-full h-36 rounded-lg overflow-hidden mb-space-sm bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Tomato plant rows with healthy green leaves and ripening red and green tomatoes in outdoor farm sunlight with rich earthy loam soil visible in background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI3r1tIPVv4xWUb_oLtXtBLupAZ3u3bx20KuPspevJkBdn251x_XVrNUs065yC3JwiIqu2vo3ilNJIwKwkSOL50Xbz-2ivjAmlMkm1zTwztMNAtwWsYkLZHWAWpwFfCBOgbYkmc-WF5YZe2_ca9vvN0GAWmXqjXf1EjOXjLGh55g4iJiBmfFgHBdSROHQcfXxD3Bmxymh_ZpkSNB13JVrkc80HeuGmha96-7IP9g"/>
+</div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Tomato (टोमॅटो)</h3>
+<span class="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface">Abhinav / Hybrid</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+            Foliar curl and early blight classification to prevent seasonal field wipeout.
+          </p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">Leaf Curl Virus (चुरडा-मुरडा)</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Early Blight</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Late Blight</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex justify-between items-center font-label-sm text-label-sm text-secondary">
+<span>96.9% Validation</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Crop 4: Cotton -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="w-full h-36 rounded-lg overflow-hidden mb-space-sm bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Cotton plant field in central India with blooming white cotton bolls and textured foliage in wide angle natural daylight with agrarian backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf8NWvyXV37VPM6thYaY188cGlc1We6itoY-rt9LFzJbMoDGfSRF6sr8DK2xKlqryohdWA45Lgmj6EK9RhNz15IRZDhj8vPW0r9hV2digR-z9idI3eVICrg1fNvkLSY-_x18-PSj3W3_1GqPwj5WFD6dGLBVobuQYh4E9CGxQKv9tEFEZ-yQOunz3RgSIk9ruD1B2cL1AXw5yE5In3-QR7L4tSi7tLngn7JaBj-Q"/>
+</div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Cotton (कापूस)</h3>
+<span class="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface">Bt Cotton</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+            Bollworm damage prediction alongside bacterial angular leaf spot spotting.
+          </p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">Bacterial Blight</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Grey Mildew</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Leaf Reddening</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex justify-between items-center font-label-sm text-label-sm text-secondary">
+<span>95.8% Validation</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Crop 5: Soybean -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="w-full h-36 rounded-lg overflow-hidden mb-space-sm bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Broad green soybean field under open sky in rural agricultural expanse, healthy legumes and textured soil under diffused morning sunlight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCD-IRa7tM6HF2fA88e-oapKQQ7MHFVvzMUTdxW9gIOQIuJo5y72JcWf6DIB1HRgQYF0dQbKw8ydEQYPVhCPvfA9dmeRpOJ1kezbY04MN80YNtLWvHRTQJ6M9LtvAat_jfSU9Do-5eTsZnvQpXQoWVB-2ae-1Z_Db9O3M0ZHxOnP5YcUcsRRKtIpn1j5Shfb0g0mFushiF0vgH6b0irJ8TNBqK6D0uPwtikKCW44Q"/>
+</div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Soybean (सोयाबीन)</h3>
+<span class="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface">JS-335 / 9305</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+            Differentiates foliar rust from yellow mosaic virus within hours of emergence.
+          </p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">Asian Rust (तांबेरा)</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Yellow Mosaic</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Pod Blight</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex justify-between items-center font-label-sm text-label-sm text-secondary">
+<span>96.3% Validation</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Crop 6: Onions -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="w-full h-36 rounded-lg overflow-hidden mb-space-sm bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Thriving green onion crop field with neat irrigation channels and healthy green shoots in rich dark loam soil under sunny rural conditions." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOEcLWrvqP1V7tTZxKw-NG4MevdGgNTMKh5KAPkc7U4rXUjJQarcRmU9slznFp2FRJkafk6SqYx198_MZVnhGPK_9cJ_mTC96RmAwt-BZU_xvmfDNj55ZqzAwKoVP0L6GbJLO_wn9-DF3D9LtEBXXTY9Rf7oW93imjXsYbUb8zLCmoEHKlPaut4oxsa2RH2E0ZzBfqcaVI3-nm1TrFNZdnHCVk2ThlaWMdCrTRnA"/>
+</div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Onion (कांदा)</h3>
+<span class="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface">Fursungi / Gavran</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+            Purple blotch detection during overcast rabi and kharif seasonal changes.
+          </p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">Purple Blotch (जांभळा करपा)</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Stemphylium Blight</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Basal Rot</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex justify-between items-center font-label-sm text-label-sm text-secondary">
+<span>97.0% Validation</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Crop 7: Wheat -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between md:col-span-2 lg:col-span-1">
+<div>
+<div class="w-full h-36 rounded-lg overflow-hidden mb-space-sm bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Golden ripe wheat field gently swaying in breeze under warm radiant sunshine, individual golden grain heads in sharp clarity with agricultural landscape background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBu8lsBk3Mq5M7L8qb8sk7pIohT0Avj01kOYrmOUZif08MQh4STeJUv8CI27xzW-GqAHs1dhBxSjGvLOtxWC_SY9nVB7wiB0G5efcRLah1nvXNtg8HZV4fx-KyVccyIwMwpbmLa1EzYsLqne0uT1it_wXLE6Fa_hYOZTYCTxeggJueEO0BGSZRtV7lD_RnjWa9gNS5CRWmoLvgmCaT7BxXnt-L8SoZnMB8TIHATBg"/>
+</div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Wheat (गहू)</h3>
+<span class="px-2 py-0.5 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface">Sharbati / HD-2967</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+            Detection of yellow and brown stripe rust spore clusters on flag leaves.
+          </p>
+<div class="flex flex-wrap gap-1">
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-error-container text-on-error-container">Yellow Stripe Rust (पिवळा तांबेरा)</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Brown Leaf Rust</span>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">Loose Smut</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex justify-between items-center font-label-sm text-label-sm text-secondary">
+<span>98.5% Validation</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- New Crop Request Card -->
+<div class="bg-surface-container p-space-md rounded-xl flex flex-col justify-between border-2 border-dashed border-outline-variant">
+<div>
+<div class="w-12 h-12 rounded-full bg-surface-container-highest text-secondary flex items-center justify-center mb-space-sm">
+<span class="material-symbols-outlined text-[28px]">add_circle</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Request Crop Expansion</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+            Are you cultivating Sugarcane (ऊस), Turmeric (हळद), or Banana (केळी)? Request automated model calibration for your district.
+          </p>
+</div>
+<button class="w-full py-3 bg-primary text-on-primary rounded-full font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors flex items-center justify-center gap-space-xs" onclick="alert('Crop telemetry model request submitted to our Agronomy AI team.')">
+<span class="material-symbols-outlined text-[18px]">send</span>
+<span>Submit Region Request</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Agronomic FAQ & Scientific Validation Section -->
+<section class="w-full max-w-[1200px] mx-auto px-margin-desktop py-space-xl mb-space-xl">
+<div class="bg-surface-container p-space-lg rounded-xl">
+<div class="max-w-2xl mb-space-lg">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Frequently Consulted</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mt-1">Frequently Asked Diagnostic Questions</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+          Everything you need to know about precision foliar diagnostics, sunlight interference, and offline usage in remote areas.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-on-surface font-headline-sm text-headline-sm mb-1">
+<span class="material-symbols-outlined text-secondary">wb_sunny</span>
+<h4>Does blinding sunlight alter the diagnosis?</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            No. The camera pipeline incorporates automated dynamic tone-mapping specifically trained against harsh 12:00 PM Indian sunlight, reducing spectral glare on oily or waxy leaves.
+          </p>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-on-surface font-headline-sm text-headline-sm mb-1">
+<span class="material-symbols-outlined text-secondary">offline_bolt</span>
+<h4>What happens if there is zero mobile 4G/5G?</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            The Kisan AI model weighs only 2.4 MB and runs natively inside your browser or mobile progressive application. No cloud inference is required for disease detection or audio playbook playback.
+          </p>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-on-surface font-headline-sm text-headline-sm mb-1">
+<span class="material-symbols-outlined text-secondary">local_pharmacy</span>
+<h4>Are agrochemical spray amounts certified safe?</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Every spray schedule aligns with CIBRC (Central Insecticides Board & Registration Committee) and Indian Council of Agricultural Research guidelines, strictly outlining protective intervals before harvesting.
+          </p>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-on-surface font-headline-sm text-headline-sm mb-1">
+<span class="material-symbols-outlined text-secondary">record_voice_over</span>
+<h4>Can elderly farmers use voice guidance?</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Yes. Audio guidance operates in regional Marathi and Hindi dialects, speaking chemical brand names, water measurements, and pruning instructions without requiring text literacy.
+          </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Fixed Bottom Voice & Scan Field Utility Bar -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-inverse-surface/95 text-inverse-on-surface px-space-md py-2.5 rounded-full shadow-2xl flex items-center gap-space-md backdrop-blur-md">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-secondary-container animate-ping"></div>
+<span class="font-label-sm text-label-sm hidden sm:inline">Offline AI Lens Ready</span>
+</div>
+<div class="h-6 w-px bg-outline-variant"></div>
+<button class="inline-flex items-center gap-space-xs bg-secondary hover:bg-tertiary text-on-secondary px-space-md py-2 rounded-full font-label-md text-label-md transition-all shadow-md active:scale-95" onclick="triggerMobileScan()">
+<span class="material-symbols-outlined text-[20px]">center_focus_strong</span>
+<span>Diagnose Leaf</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest/20 hover:bg-surface-container-highest/30 flex items-center justify-center text-inverse-on-surface transition-all" onclick="simulateVoiceQuery()" title="Speak Query">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+</button>
+</div>
+</div>
+<script>
+  let isPlayingAudio = false;
+  let currentLanguage = 'mr';
+
+  const audioTranscripts = {
+    mr: {
+      title: "मराठी ऑडिओ सारांश:",
+      body: `"शेतकरी बंधूंनो, डाळिंबावरील तेल्या रोगाचा (Bacterial Blight) प्रादुर्भाव ९४% आढळला आहे. बाधित फांद्या तत्काळ २ इंच खाली कापून नष्ट करा. स्वच्छ सूर्यप्रकाशात कॉपर ऑक्सिक्लोराईड २.५ ग्रॅम प्रति लिटर पाण्यात मिसळून तात्काळ फवारणी करा. झाडांच्या बुंध्याजवळ पाणी साचू देऊ नका."`
+    },
+    hi: {
+      title: "हिन्दी ऑडियो सारांश:",
+      body: `"किसान भाइयों, अनार के इस फल में बैक्टीरियल ब्लाइट (तेलिया रोग) का प्रकोप ९४% पाया गया है। संक्रमित टहनियों को तुरंत २ इंच नीचे से काटकर नष्ट कर दें। तेज धूप में कॉपर ऑक्सीक्लोराइड २.५ ग्राम प्रति लीटर पानी में मिलाकर तुरंत छिड़काव करें। पेड़ों की जड़ों में पानी जमा न होने दें।"`
+    }
+  };
+
+  function toggleAudioAdvisory() {
+    isPlayingAudio = !isPlayingAudio;
+    const playIcon = document.getElementById('playIcon');
+    const audioBtn = document.getElementById('audioPlayBtn');
+
+    if (isPlayingAudio) {
+      playIcon.innerText = 'pause';
+      audioBtn.classList.remove('bg-secondary');
+      audioBtn.classList.add('bg-primary');
+      
+      // Simulate synthetic audio reading using SpeechSynthesis if available
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const textToSpeak = audioTranscripts[currentLanguage].body;
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = currentLanguage === 'mr' ? 'mr-IN' : 'hi-IN';
+        utterance.rate = 0.9;
+        utterance.onend = () => {
+          isPlayingAudio = false;
+          playIcon.innerText = 'volume_up';
+          audioBtn.classList.remove('bg-primary');
+          audioBtn.classList.add('bg-secondary');
+        };
+        window.speechSynthesis.speak(utterance);
+      }
+    } else {
+      playIcon.innerText = 'volume_up';
+      audioBtn.classList.remove('bg-primary');
+      audioBtn.classList.add('bg-secondary');
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+  }
+
+  function setLanguage(lang) {
+    currentLanguage = lang;
+    const btnMr = document.getElementById('langMr');
+    const btnHi = document.getElementById('langHi');
+    const transcriptEl = document.getElementById('transcriptText');
+
+    if (lang === 'mr') {
+      btnMr.className = "px-space-sm py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm transition-all";
+      btnHi.className = "px-space-sm py-1 rounded-full text-on-surface-variant font-label-sm text-label-sm transition-all";
+    } else {
+      btnHi.className = "px-space-sm py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm transition-all";
+      btnMr.className = "px-space-sm py-1 rounded-full text-on-surface-variant font-label-sm text-label-sm transition-all";
+    }
+
+    transcriptEl.innerHTML = `<span class="font-bold text-on-surface block mb-1">${audioTranscripts[lang].title}</span>${audioTranscripts[lang].body}`;
+
+    if (isPlayingAudio) {
+      toggleAudioAdvisory();
+      toggleAudioAdvisory();
+    }
+  }
+
+  function triggerMobileScan() {
+    const lens = document.getElementById('lensInput');
+    if (lens) {
+      lens.click();
+    } else {
+      alert("Camera lens ready. Point sensor directly at foliar lesion.");
+    }
+  }
+
+  function simulateVoiceQuery() {
+    alert("Voice Assistant Listening: विचार करा (उदा. 'डाळिंबावरील तेल्या कसा थांबवायचा?') / बोलिए (उदा. 'अनार पर स्प्रे कब करें?')");
+  }
+
+  function selectCrop(cropName) {
+    alert(`Loaded high-resolution diagnostic model calibrated for ${cropName.toUpperCase()}. Point camera or load file to view neural heatmap.`);
+  }
+
+  // Handle mock file upload
+  document.getElementById('lensInput')?.addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+      alert(`Image "${e.target.files[0].name}" loaded into offline Vision AI. Parsing bounding mask and foliar chlorosis...`);
+    }
+  });
+</script></main><footer class="w-full bg-surface-container py-space-xl border-t border-surface-variant"><div class="max-w-[1200px] mx-auto px-margin-desktop"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter-desktop mb-space-xl"><div><div class="flex items-center gap-space-sm mb-space-sm"><span class="material-symbols-outlined text-secondary text-[28px]">spa</span><span class="font-headline-sm text-headline-sm text-primary font-bold">Kisan AI</span></div><p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed mb-space-md">Empowering agricultural producers with resilient, offline-first artificial intelligence, real-time crop telemetry, and field-tested predictive insights.</p><div class="flex items-center gap-space-xs text-on-surface font-label-sm text-label-sm"><span class="material-symbols-outlined text-secondary text-[18px]">mail</span><a class="hover:text-secondary underline underline-offset-2 transition-colors" href="mailto:aditya@adityaborade.software">aditya@adityaborade.software</a></div></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md">Quick Navigation</h4><ul class="flex flex-col gap-space-xs font-body-sm text-body-sm"><li data-active-classes="text-secondary font-bold"><a class="text-on-surface-variant hover:text-on-surface transition-colors" data-path="overview" href="#">Overview (Home)</a></li><li data-active-classes="text-secondary font-bold"><a class="text-on-surface-variant hover:text-on-surface transition-colors" data-path="crop-intelligence" href="#">Crop Intelligence</a></li><li data-active-classes="text-secondary font-bold"><a class="text-on-surface-variant hover:text-on-surface transition-colors" data-path="disease-detection" href="#">Disease Detection & Diagnosis</a></li><li data-active-classes="text-secondary font-bold"><a class="text-on-surface-variant hover:text-on-surface transition-colors" data-path="weather-platform" href="#">Microclimate & Weather Platform</a></li><li data-active-classes="text-secondary font-bold"><a class="text-on-surface-variant hover:text-on-surface transition-colors" data-path="technology" href="#">Agronomic Intelligence Core</a></li><li data-active-classes="text-secondary font-bold"><a class="text-on-surface-variant hover:text-on-surface transition-colors" data-path="contact" href="#">Advisory & Contact Support</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md">Architecture Stack</h4><p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">Engineered for extreme reliability under offline field parameters and high sunlight glare.</p><div class="flex flex-wrap gap-space-xs"><span class="inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-high text-on-surface font-label-sm text-label-sm rounded-full"><span class="material-symbols-outlined text-secondary text-[16px]">cloud_sync</span>Edge Sync</span><span class="inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-high text-on-surface font-label-sm text-label-sm rounded-full"><span class="material-symbols-outlined text-secondary text-[16px]">memory</span>Vision ML</span><span class="inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-high text-on-surface font-label-sm text-label-sm rounded-full"><span class="material-symbols-outlined text-secondary text-[16px]">sensors</span>Telemetry IoT</span><span class="inline-flex items-center gap-1 px-space-sm py-1 bg-surface-container-high text-on-surface font-label-sm text-label-sm rounded-full"><span class="material-symbols-outlined text-secondary text-[16px]">security</span>Decentralized</span></div></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md">Field Resilience</h4><p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed mb-space-md">High-contrast utilitarian optics crafted specifically for outdoor accessibility across agrarian communities.</p><div class="p-space-sm bg-surface-container-low rounded-xl flex items-start gap-space-xs"><span class="material-symbols-outlined text-secondary text-[20px] shrink-0">wifi_off</span><p class="font-body-sm text-body-sm text-on-surface-variant">Offline-first models maintain full local diagnostics without cellular connectivity.</p></div></div></div><div class="pt-space-md border-t border-surface-variant flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-body-sm text-body-sm text-on-surface-variant">© 2025 Kisan AI. All rights reserved. Precision Agronomics Platform.</p><div class="flex items-center gap-space-md"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="overview" href="#">Privacy Policy</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="overview" href="#">Terms of Agronomic Use</a></div></div></div></footer></body></html>

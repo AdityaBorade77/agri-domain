@@ -1,11 +1,11 @@
 {
-  "name": "मराठी-इंग्रजी भाषांतरक",
-  "short_name": "मराठी Translator",
-  "description": "Marathi Speech to English Text and English Text to Marathi Speech converter",
+  "name": "Kisan AI — Smart Farmer Assistant",
+  "short_name": "Kisan AI",
+  "description": "AI-Powered Agricultural Intelligence for Indian farmers. Crop recommendations, disease detection, and weather platform.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0D1117",
-  "theme_color": "#FF6B2B",
+  "background_color": "#eefdf3",
+  "theme_color": "#2c694e",
   "orientation": "portrait-primary",
   "lang": "mr",
   "icons": [
@@ -22,19 +22,27 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["utilities", "productivity"],
+  "categories": ["agriculture", "utilities", "productivity"],
   "shortcuts": [
     {
-      "name": "बोला मराठीत",
-      "short_name": "Speak",
-      "description": "Start Marathi speech input",
-      "url": "/?mode=speech"
+      "name": "Crop Intelligence",
+      "short_name": "Crops",
+      "description": "View crop recommendations",
+      "url": "/#crop-intelligence"
     },
     {
-      "name": "टाइप करा इंग्रजीत",
-      "short_name": "Type",
-      "description": "Type English text",
-      "url": "/?mode=text"
+      "name": "Disease Detection",
+      "short_name": "Disease",
+      "description": "Check plant diseases",
+      "url": "/#disease-detection"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Kisan AI Overview"
     }
   ]
 }

@@ -1305,6 +1305,11 @@ const App = (() => {
 
 /* ─── Boot ────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
-  App.init();
-  Toast.show("🙏 नमस्कार! Tap the mic to speak Marathi.", "info", 4000);
+  // Only initialize the legacy chat UI when its root elements are present.
+  // The new Kisan AI SPA (kisan-app.js) handles the main UI instead.
+  const hasLegacyUI = !!document.getElementById("chat-area");
+  if (hasLegacyUI) {
+    App.init();
+    Toast.show("🙏 नमस्कार! Tap the mic to speak Marathi.", "info", 4000);
+  }
 });

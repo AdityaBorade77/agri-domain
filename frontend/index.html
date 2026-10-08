@@ -1,211 +1,1175 @@
 <!DOCTYPE html>
-<html lang="mr" dir="ltr">
-
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#FF6B2B" />
+  <meta name="theme-color" content="#2c694e" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="मराठी Translator" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Kisan AI" />
 
   <!-- SEO -->
-  <title>मराठी-इंग्रजी भाषांतरक | Marathi-English Speech Translator</title>
-  <meta name="description"
-    content="Speak Marathi and get English translation. Type English and hear it in Marathi. AI-powered speech translator for Maharashtra." />
-  <meta name="keywords"
-    content="Marathi speech to text, English to Marathi TTS, AI4Bharat, Marathi translator, Maharashtra" />
+  <title>Kisan AI — AI-Powered Agricultural Intelligence for Farmers</title>
+  <meta name="description" content="Kisan AI helps farmers make better decisions using AI, weather, soil and crop intelligence. Built to operate in Marathi, Hindi and English with offline support." />
+  <meta name="keywords" content="Kisan AI, agricultural AI, crop recommendation, plant disease detection, Marathi farming app, Maharashtra agriculture, smart farming" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="मराठी-इंग्रजी भाषांतरक" />
-  <meta property="og:description"
-    content="AI-powered Marathi speech recognition and English-to-Marathi text-to-speech chatbot" />
+  <meta property="og:title" content="Kisan AI — Smart Farmer Assistant" />
+  <meta property="og:description" content="AI-Powered Agricultural Intelligence for Indian farmers. Crop recommendations, disease detection, weather platform." />
   <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://og.adityaborade.software/kisan-ai.png" />
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎤</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
 
   <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
-
 </head>
 
-<body>
+<body class="page-overview">
 
-  <!-- Background mesh gradient -->
-  <div class="bg-mesh" aria-hidden="true"></div>
-
-  <!-- ═══════════════════════════════════════════════════════
-     APP SHELL
-═══════════════════════════════════════════════════════ -->
-  <div class="layout-container">
-
-    <!-- ── Sidebar ─────────────────────────────────────────── -->
-    <aside class="history-sidebar" id="history-sidebar" role="navigation" aria-label="Chat history">
-      <div class="sidebar-header">
-        <button class="new-chat-btn" id="new-chat-btn" aria-label="Create new chat">
-          <span>+</span> New Chat
-        </button>
-        <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close sidebar">✕</button>
+  <!-- ═══════════════ OFFLINE TELEMETRY BANNER ═══════════════ -->
+  <div class="offline-banner" id="offline-banner" role="status">
+    <div class="offline-banner__inner">
+      <div class="offline-banner__left">
+        <span class="material-symbols-outlined">wifi_tethering</span>
+        <span>HYPERLOCAL TELEMETRY ACTIVE: Nashik &amp; Sahyadri Basin Real-time Core Synced</span>
       </div>
-      <div class="sidebar-content">
-        <ul class="chat-list" id="chat-list" role="list">
-          <!-- Populated by JS -->
-        </ul>
+      <div class="offline-banner__right">
+        <span class="dot dot--green"></span>
+        <span>Offline Models Ready</span>
+        <span class="separator">|</span>
+        <span>Lat: 20.00°N · Lon: 73.78°E</span>
       </div>
-    </aside>
-
-    <div id="app">
-
-      <!-- ── Header ─────────────────────────────────────────── -->
-      <header class="app-header" role="banner">
-      <div class="app-logo">
-        <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Toggle history" title="Toggle Sidebar">
-          ☰
-        </button>
-        <div class="logo-icon" aria-hidden="true">🎙️</div>
-        <div class="logo-text">
-          <span class="logo-title">मराठी Translator</span>
-          <span class="logo-subtitle">मराठी ⇄ English AI Translator</span>
-        </div>
-      </div>
-
-      <div class="header-status">
-        <div class="status-indicator" id="status-indicator" role="status" aria-live="polite">
-          <div class="status-dot"></div>
-          <span id="status-text">Connecting...</span>
-        </div>
-        <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Open settings">
-          ⚙️
-        </button>
-      </div>
-    </header>
-
-    <!-- ── Chat Area ─────────────────────────────────────── -->
-    <main class="chat-area" id="chat-area" role="main" aria-label="Chat messages" aria-live="polite">
-
-      <!-- Welcome Screen (hidden after first message) -->
-      <div class="welcome-screen" id="welcome-screen" role="complementary" aria-label="Getting started">
-        <div class="welcome-icon" aria-hidden="true">🌾</div>
-
-        <div>
-          <h1 class="welcome-title">
-            नमस्कार! Speak <span>Marathi</span>,<br />
-            Hear it in <span>English</span>
-          </h1>
-          <p class="welcome-subtitle">
-            Hold the mic button and speak in Marathi.<br />
-            Or type English text to hear it spoken in Marathi.
-          </p>
-        </div>
-
-        <div class="welcome-tips" role="list">
-          <div class="tip-card" role="listitem">
-            <span class="tip-icon">🎙️</span>
-            <span>Hold mic &amp; speak <strong>Marathi</strong></span>
-          </div>
-          <div class="tip-card" role="listitem">
-            <span class="tip-icon">📝</span>
-            <span>Type <strong>English</strong> text</span>
-          </div>
-          <div class="tip-card" role="listitem">
-            <span class="tip-icon">🔊</span>
-            <span>Tap ↺ to <strong>replay</strong> Marathi speech</span>
-          </div>
-        </div>
-      </div>
-
-    </main>
-
-    <!-- ── Input Bar ─────────────────────────────────────── -->
-    <footer class="input-bar" role="contentinfo">
-
-      <!-- Live Marathi transcript (shown while recording) -->
-      <div class="input-transcript" id="input-transcript" aria-label="Live Marathi transcript" aria-live="polite"></div>
-
-      <div class="input-row">
-
-        <!-- Mic Button -->
-        <div class="mic-container">
-          <button class="mic-btn" id="mic-btn" aria-label="Hold to record Marathi speech"
-            title="Hold to speak in Marathi">
-            🎙️
-          </button>
-          <div class="mic-label" id="mic-label" aria-hidden="true">Hold to speak</div>
-        </div>
-
-        <!-- Text Input -->
-        <div class="text-input-wrapper">
-          <textarea id="text-input" placeholder="Type English text here... (Shift+Enter for new line)" rows="1"
-            maxlength="2000" aria-label="Type English text to convert to Marathi speech" autocomplete="off"
-            spellcheck="true"></textarea>
-          <button class="send-btn" id="send-btn" aria-label="Send English text for Marathi translation"
-            title="Send (Enter)">
-            ➤
-          </button>
-        </div>
-
-      </div>
-    </footer>
-
-  </div>
-  <!-- /.layout-container -->
-
-
-  <!-- ═══════════════════════════════════════════════════════
-     SETTINGS MODAL
-═══════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="settings-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal" id="settings-modal">
-
-      <div class="modal-header">
-        <div class="modal-title" id="modal-title">
-          ⚙️ Settings
-        </div>
-        <button class="modal-close" id="settings-close" aria-label="Close settings">✕</button>
-      </div>
-
-      <!-- API URL -->
-      <div class="modal-section">
-        <label class="modal-label" for="api-url-input">Backend API URL</label>
-        <input type="url" id="api-url-input" class="modal-input" placeholder="http://localhost:8000"
-          value="http://localhost:8000" aria-describedby="api-url-help" />
-        <p id="api-url-help" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">
-          Start backend: <code style="color: var(--accent);">cd backend && start.bat</code>
-        </p>
-      </div>
-
-      <!-- Voice Selection -->
-      <div class="modal-section">
-        <label class="modal-label">Marathi TTS Voice</label>
-        <div class="voice-grid" id="voice-grid">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-
-      <!-- Save -->
-      <button class="modal-save" id="settings-save">
-        Save Settings
-      </button>
-
     </div>
   </div>
 
+  <!-- ═══════════════ HEADER / NAV ═══════════════ -->
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner">
+      <div class="site-header__brand">
+        <div class="brand-logo" aria-hidden="true">🌾</div>
+        <a class="brand-name" href="#" data-page="overview" id="brand-link">Kisan AI</a>
+      </div>
 
-  <!-- ═══════════════════════════════════════════════════════
-     SCRIPTS
-═══════════════════════════════════════════════════════ -->
+      <nav class="site-nav" id="site-nav" aria-label="Main navigation">
+        <a class="nav-link nav-link--active" data-page="overview" href="#" aria-current="page">Overview</a>
+        <a class="nav-link" data-page="crop-intelligence" href="#">Crop Intelligence</a>
+        <a class="nav-link" data-page="disease-detection" href="#">Disease Detection</a>
+        <a class="nav-link" data-page="weather-platform" href="#">Weather Platform</a>
+        <a class="nav-link" data-page="technology" href="#">Technology</a>
+        <a class="nav-link" data-page="contact" href="#">Contact</a>
+      </nav>
+
+      <div class="site-header__actions">
+        <button class="btn btn--secondary btn--sm" id="voice-assistant-btn" aria-label="Open voice assistant">
+          <span class="material-symbols-outlined">mic</span>
+          <span class="hide-mobile">Talk to Kisan AI</span>
+        </button>
+        <div class="avatar" aria-label="User profile">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+        <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle mobile menu" aria-expanded="false">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Drawer -->
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" aria-hidden="true">
+      <a class="mobile-nav-link" data-page="overview" href="#">Overview</a>
+      <a class="mobile-nav-link" data-page="crop-intelligence" href="#">Crop Intelligence</a>
+      <a class="mobile-nav-link" data-page="disease-detection" href="#">Disease Detection</a>
+      <a class="mobile-nav-link" data-page="weather-platform" href="#">Weather Platform</a>
+      <a class="mobile-nav-link" data-page="technology" href="#">Technology</a>
+      <a class="mobile-nav-link" data-page="contact" href="#">Contact</a>
+    </nav>
+  </header>
+
+  <!-- ═══════════════ MAIN CONTENT (SPA Router) ═══════════════ -->
+  <main class="main-content" id="main-content" role="main">
+
+    <!-- ──────────────────────────────────────────────────────────
+         PAGE: OVERVIEW (Landing)
+    ──────────────────────────────────────────────────────────── -->
+    <div class="page" id="page-overview">
+
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="ambient-glow ambient-glow--green" aria-hidden="true"></div>
+        <div class="ambient-glow ambient-glow--brown" aria-hidden="true"></div>
+        <div class="container hero__grid">
+
+          <!-- Hero Text -->
+          <div class="hero__text">
+            <div class="badge badge--green">
+              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">eco</span>
+              Field-Tested Agronomic Intelligence
+            </div>
+            <h1 class="display-text">AI-Powered Agricultural Intelligence</h1>
+            <p class="body-lg text-muted">
+              Helping farmers make better decisions using AI, weather, soil and crop intelligence.
+              Built to operate seamlessly under harsh sunlight and across regional dialects.
+            </p>
+            <div class="hero__ctas">
+              <button class="btn btn--secondary btn--lg" data-page="crop-intelligence" id="explore-btn">
+                <span class="material-symbols-outlined">psychology</span>
+                Explore Platform
+              </button>
+              <button class="btn btn--ghost btn--lg" id="voice-demo-btn">
+                <span class="material-symbols-outlined">mic</span>
+                Try Voice Assistant
+              </button>
+            </div>
+            <div class="hero__stats">
+              <div class="stat">
+                <span class="stat__num">38,000+</span>
+                <span class="stat__label">Acres Monitored</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat">
+                <span class="stat__num">94.2%</span>
+                <span class="stat__label">Diagnosis Precision</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat">
+                <span class="stat__num">&lt; 1.2s</span>
+                <span class="stat__label">Voice Query Latency</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Telemetry Card -->
+          <div class="hero__card">
+            <div class="telemetry-card">
+              <div class="telemetry-card__header">
+                <div class="telemetry-card__title">
+                  <span class="dot dot--green dot--sm"></span>
+                  Kisan Core Telemetry · Node 04
+                </div>
+                <span class="tag tag--green">LIVE FIELD DATA</span>
+              </div>
+
+              <!-- Bento Grid -->
+              <div class="telemetry-grid">
+                <div class="telemetry-metric">
+                  <div class="telemetry-metric__header">
+                    <span class="label-sm text-muted">Crop Suitability</span>
+                    <span class="material-symbols-outlined text-green">agriculture</span>
+                  </div>
+                  <div class="display-mobile-text text-green">92%</div>
+                  <div class="label-sm">Red Onion (Garva)</div>
+                  <div class="caption text-muted">Soil pH: 6.8 · High N-P-K</div>
+                </div>
+                <div class="telemetry-metric">
+                  <div class="telemetry-metric__header">
+                    <span class="label-sm text-muted">Blight Diagnostic</span>
+                    <span class="material-symbols-outlined text-brown">biotech</span>
+                  </div>
+                  <div class="display-mobile-text text-brown">94%</div>
+                  <div class="label-sm">Bacterial Blight</div>
+                  <div class="caption text-error">Copper Oxychloride Req.</div>
+                </div>
+              </div>
+
+              <!-- Weather Mini -->
+              <div class="weather-mini">
+                <div class="weather-mini__left">
+                  <span class="material-symbols-outlined text-green" style="font-size:2rem">wb_sunny</span>
+                  <div>
+                    <div class="label-lg">Nashik Microclimate · 28°C</div>
+                    <div class="caption text-muted">Humidity: 48% · Wind: 9 km/h NE</div>
+                  </div>
+                </div>
+                <div class="weather-mini__right">
+                  <span class="tag tag--green">Safe Spray Window</span>
+                  <div class="caption text-muted">Optimal till 11:30 AM</div>
+                </div>
+              </div>
+
+              <!-- Voice Assistant Mock -->
+              <div class="voice-mock">
+                <div class="voice-mock__header">
+                  <div class="voice-mock__info">
+                    <div class="mic-icon">
+                      <span class="material-symbols-outlined">mic</span>
+                    </div>
+                    <div>
+                      <div class="label-sm font-bold">मराठी आवाज सहाय्यक</div>
+                      <div class="caption text-muted">"कांद्यावरील करपा रोगावर काय फवारणी करावी?"</div>
+                    </div>
+                  </div>
+                  <span class="label-sm text-green font-bold">00:04</span>
+                </div>
+                <div class="waveform" aria-hidden="true">
+                  <span class="wave-bar" style="height:0.75rem"></span>
+                  <span class="wave-bar" style="height:1.5rem;animation-delay:150ms"></span>
+                  <span class="wave-bar" style="height:1rem;animation-delay:300ms"></span>
+                  <span class="wave-bar" style="height:1.75rem;animation-delay:75ms"></span>
+                  <span class="wave-bar" style="height:2rem;animation-delay:200ms"></span>
+                  <span class="wave-bar" style="height:1.25rem;animation-delay:400ms"></span>
+                  <span class="wave-bar" style="height:1.75rem;animation-delay:250ms"></span>
+                  <span class="wave-bar" style="height:0.75rem;animation-delay:100ms"></span>
+                  <span class="wave-bar" style="height:1.5rem;animation-delay:350ms"></span>
+                  <span class="wave-bar" style="height:1rem;animation-delay:180ms"></span>
+                  <span class="wave-bar" style="height:0.5rem"></span>
+                </div>
+                <div class="voice-mock__response">
+                  <span class="body-sm text-muted italic">Kisan AI: "२ ग्रॅम मॅन्कोझेब प्रति लिटर पाण्यात मिसळून फवारावे."</span>
+                  <span class="material-symbols-outlined text-green">volume_up</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mission Section -->
+      <section class="mission-section">
+        <div class="container">
+          <div class="mission-card">
+            <div class="quote-bg" aria-hidden="true">
+              <span class="material-symbols-outlined">format_quote</span>
+            </div>
+            <div class="mission-content">
+              <div class="badge badge--brown">
+                <span class="material-symbols-outlined">psychology_alt</span>
+                Our Core Mission
+              </div>
+              <h2 class="headline-lg">"We are building an AI-powered agricultural decision-support platform that helps farmers make personalized decisions based on their farm conditions."</h2>
+              <p class="body-lg text-muted">
+                By shifting agronomic intelligence from broad-brush regional bulletins to sub-acre precision calculations,
+                Kisan AI shields smallholder livelihoods against climate shocks, volatile mandi rates, and crop-destroying pathogens.
+              </p>
+              <div class="mission-pillars">
+                <div class="pillar">
+                  <div class="pillar__icon">
+                    <span class="material-symbols-outlined">pin_drop</span>
+                  </div>
+                  <div>
+                    <h3 class="headline-sm">Field-Level Personalization</h3>
+                    <p class="body-sm text-muted">Calibration tailored down to your specific soil mineral profile, slope angle, and crop sowing date.</p>
+                  </div>
+                </div>
+                <div class="pillar">
+                  <div class="pillar__icon">
+                    <span class="material-symbols-outlined">record_voice_over</span>
+                  </div>
+                  <div>
+                    <h3 class="headline-sm">Multilingual Voice-First</h3>
+                    <p class="body-sm text-muted">Zero complex typing required. Speak naturally in vernacular dialects including Marathi, Hindi, and English.</p>
+                  </div>
+                </div>
+                <div class="pillar">
+                  <div class="pillar__icon">
+                    <span class="material-symbols-outlined">radar</span>
+                  </div>
+                  <div>
+                    <h3 class="headline-sm">Hyperlocal Precision</h3>
+                    <p class="body-sm text-muted">Targeted microclimate forecasting delivering exact canopy temperature and dew point projections.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Grid Section -->
+      <section class="features-section">
+        <div class="container">
+          <div class="section-header">
+            <div>
+              <div class="badge badge--green">
+                <span class="material-symbols-outlined">grid_view</span>
+                Modular Platform Suite
+              </div>
+              <h2 class="headline-lg">What We're Building</h2>
+            </div>
+            <p class="body-md text-muted feature-desc">Four foundational pillars engineered to eradicate uncertainty across seed selection, disease intervention, and market timing.</p>
+          </div>
+
+          <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card" tabindex="0">
+              <div class="feature-card__top">
+                <div class="feature-icon feature-icon--green">
+                  <span class="material-symbols-outlined">potted_plant</span>
+                </div>
+                <span class="tag">ROI &amp; Yield Modeler</span>
+              </div>
+              <h3 class="headline-md">1. Crop Recommendation Engine</h3>
+              <p class="body-md text-muted">Personalized crop recommendations synthesized from historical soil tests, seasonal weather projections, and geo-indexed field conditions.</p>
+              <div class="feature-preview">
+                <div class="mandi-row">
+                  <span class="label-sm font-bold">Mandi Price Forecast (Nashik APMC):</span>
+                  <span class="label-sm text-green font-bold">₹1,850 – ₹2,300 / Qtl</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill progress-fill--green" style="width:80%"></div>
+                </div>
+                <div class="mandi-row">
+                  <span class="body-sm text-muted">Estimated Input Cost: ₹32,000/Acre</span>
+                  <span class="body-sm text-green font-bold">Projected Net ROI: +184%</span>
+                </div>
+              </div>
+              <div class="feature-card__footer text-green">
+                <span>Soil NPK balance analyzer included</span>
+                <span class="material-symbols-outlined">check_circle</span>
+              </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card" tabindex="0">
+              <div class="feature-card__top">
+                <div class="feature-icon feature-icon--brown">
+                  <span class="material-symbols-outlined">coronavirus</span>
+                </div>
+                <span class="tag">Vision ML Engine</span>
+              </div>
+              <h3 class="headline-md">2. Plant Disease Detection</h3>
+              <p class="body-md text-muted">Edge-optimized computer vision for instantaneous crop pathology identification straight from mobile snapshots.</p>
+              <div class="feature-preview">
+                <div class="disease-preview">
+                  <div class="disease-preview__img">🌿</div>
+                  <div>
+                    <div class="label-sm text-brown font-bold">Purple Blotch (Alternaria porri)</div>
+                    <div class="label-sm text-error font-bold">Alert</div>
+                    <p class="body-sm text-muted">Mancozeb 75 WP @ 2.5g/L water during low-wind morning window.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-card__footer text-brown">
+                <span>Offline-capable image inference</span>
+                <span class="material-symbols-outlined">verified</span>
+              </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card" tabindex="0">
+              <div class="feature-card__top">
+                <div class="feature-icon feature-icon--green">
+                  <span class="material-symbols-outlined">cloud_sync</span>
+                </div>
+                <span class="tag">Sub-Kilometer Radar</span>
+              </div>
+              <h3 class="headline-md">3. Weather Intelligence Platform</h3>
+              <p class="body-md text-muted">Farm-specific microclimate telemetry designed to eliminate guesswork around critical agricultural operations.</p>
+              <div class="feature-preview">
+                <div class="label-sm font-bold" style="margin-bottom:0.5rem">Hourly Operations Forecast:</div>
+                <div class="hourly-grid">
+                  <div class="hour-card hour-card--good"><div class="caption">07:00</div><div class="label-sm text-green font-bold">Good</div><div class="caption">Spray OK</div></div>
+                  <div class="hour-card hour-card--good"><div class="caption">10:00</div><div class="label-sm text-green font-bold">Optimal</div><div class="caption">Irrigate</div></div>
+                  <div class="hour-card hour-card--poor"><div class="caption">14:00</div><div class="label-sm text-error font-bold">Poor</div><div class="caption">High Heat</div></div>
+                  <div class="hour-card hour-card--good"><div class="caption">17:00</div><div class="label-sm text-green font-bold">Good</div><div class="caption">Spray OK</div></div>
+                </div>
+              </div>
+              <div class="feature-card__footer text-green">
+                <span>Automated SMS/Push precipitation alarms</span>
+                <span class="material-symbols-outlined">notifications_active</span>
+              </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-card" tabindex="0">
+              <div class="feature-card__top">
+                <div class="feature-icon feature-icon--teal">
+                  <span class="material-symbols-outlined">interpreter_mode</span>
+                </div>
+                <span class="tag">Audio LLM Fine-Tuned</span>
+              </div>
+              <h3 class="headline-md">4. Multilingual AI Assistant</h3>
+              <p class="body-md text-muted">Interactive conversational agronomy delivered naturally in regional tongues. Trained on local vernacular terminology and mandi pricing slang.</p>
+              <div class="feature-preview">
+                <div class="lang-pills">
+                  <span class="pill pill--active">मराठी (Marathi)</span>
+                  <span class="pill">हिंदी (Hindi)</span>
+                  <span class="pill">English</span>
+                </div>
+                <div class="dialect-note">
+                  <span class="material-symbols-outlined text-green">record_voice_over</span>
+                  <span class="body-sm text-muted">Dialect acoustic normalization handles field wind noise</span>
+                </div>
+              </div>
+              <div class="feature-card__footer text-brown">
+                <span>Conversational latency &lt; 1200ms</span>
+                <span class="material-symbols-outlined">bolt</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tech Pipeline Section -->
+      <section class="tech-section">
+        <div class="container">
+          <div class="tech-header">
+            <div class="badge badge--green">
+              <span class="material-symbols-outlined">developer_board</span>
+              Deep Tech Foundation
+            </div>
+            <h2 class="headline-lg">Engineered for Harsh Real-World Farms</h2>
+            <p class="body-md text-muted">From multi-spectral satellite swarms to sub-second quantized edge models running inside rural cellular dead zones.</p>
+          </div>
+          <div class="tech-badges">
+            <span class="tech-badge"><span class="dot dot--green dot--sm"></span>Artificial Intelligence</span>
+            <span class="tech-badge"><span class="dot dot--green dot--sm"></span>Machine Learning</span>
+            <span class="tech-badge"><span class="dot dot--green dot--sm"></span>Computer Vision</span>
+            <span class="tech-badge"><span class="dot dot--brown dot--sm"></span>Fine-Tuned Agricultural LLMs</span>
+            <span class="tech-badge"><span class="dot dot--green dot--sm"></span>High-Resolution Weather Data</span>
+            <span class="tech-badge"><span class="dot dot--green dot--sm"></span>Geospatial Intelligence</span>
+          </div>
+          <div class="pipeline-card">
+            <h3 class="headline-sm">
+              <span class="material-symbols-outlined text-green">conversion_path</span>
+              End-to-End Telemetry Pipeline: Satellite to Soil
+            </h3>
+            <div class="pipeline-grid">
+              <div class="pipeline-step">
+                <div class="pipeline-step__header">
+                  <span class="label-sm text-green font-bold">PHASE 01</span>
+                  <span class="material-symbols-outlined text-green">satellite_alt</span>
+                </div>
+                <h4 class="headline-sm">Earth Observation</h4>
+                <p class="body-sm text-muted">Sentinel-2 &amp; Landsat multispectral imagery captures NDVI, NDRE, and canopy moisture indices.</p>
+                <div class="pipeline-step__footer text-green">Resolution: 10m Ground Sample</div>
+              </div>
+              <div class="pipeline-step">
+                <div class="pipeline-step__header">
+                  <span class="label-sm text-green font-bold">PHASE 02</span>
+                  <span class="material-symbols-outlined text-green">sensors</span>
+                </div>
+                <h4 class="headline-sm">In-Situ IoT &amp; Soil</h4>
+                <p class="body-sm text-muted">Ground telemetry nodes ingest regional soil moisture, electrical conductivity, and nitrogen levels.</p>
+                <div class="pipeline-step__footer text-green">Update Frequency: 15 Minutes</div>
+              </div>
+              <div class="pipeline-step">
+                <div class="pipeline-step__header">
+                  <span class="label-sm text-brown font-bold">PHASE 03</span>
+                  <span class="material-symbols-outlined text-brown">memory</span>
+                </div>
+                <h4 class="headline-sm">AI Inference Core</h4>
+                <p class="body-sm text-muted">Edge-quantized Vision Transformers and regional agronomy LLMs evaluate risk matrices in real time.</p>
+                <div class="pipeline-step__footer text-brown">Compute: INT8 Edge Quantization</div>
+              </div>
+              <div class="pipeline-step">
+                <div class="pipeline-step__header">
+                  <span class="label-sm text-green font-bold">PHASE 04</span>
+                  <span class="material-symbols-outlined text-green">voice_chat</span>
+                </div>
+                <h4 class="headline-sm">On-Device Audio</h4>
+                <p class="body-sm text-muted">Instant vernacular voice synthesized into regional dialect, playable offline without cellular lag.</p>
+                <div class="pipeline-step__footer text-green">Output: Marathi / Hindi / English</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Farmer Stories Section -->
+      <section class="stories-section">
+        <div class="container">
+          <div class="section-header">
+            <div>
+              <div class="badge badge--green">
+                <span class="material-symbols-outlined">verified_user</span>
+                Field Proven
+              </div>
+              <h2 class="headline-lg">Tested in the Orchards of Maharashtra</h2>
+              <p class="body-md text-muted">Real growers sharing quantitative outcomes across Dindori and Niphad agricultural belts.</p>
+            </div>
+          </div>
+
+          <div class="stories-grid">
+            <!-- Farmer card -->
+            <div class="farmer-card">
+              <div class="farmer-card__img" aria-label="Farmer in pomegranate orchard">
+                <span style="font-size:5rem;line-height:1">👨‍🌾</span>
+                <span class="farmer-location">Dindori Cluster, Nashik</span>
+              </div>
+              <div class="farmer-card__body">
+                <div class="headline-sm">Rajendra Gaikwad</div>
+                <div class="body-sm text-muted">14-Acre Pomegranate &amp; Red Onion Cultivator</div>
+                <p class="body-sm text-muted mt-sm">
+                  "Last monsoon, bacterial blight began spreading through neighbouring orchards. Kisan AI alerted us 48 hours before humidity peaked and advised an exact copper bactericide schedule in Marathi. We protected 90% of our fruit harvest."
+                </p>
+                <div class="farmer-card__footer">
+                  <span>Verified Grower Profile</span>
+                  <span class="material-symbols-outlined text-green">check_circle</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="metrics-area">
+              <div class="metrics-row">
+                <div class="metric-card">
+                  <span class="body-sm text-muted">Chemical Cost Reduction</span>
+                  <span class="display-mobile-text text-green">32%</span>
+                  <p class="body-sm text-muted">Eliminated unnecessary calendar spraying schedules.</p>
+                </div>
+                <div class="metric-card">
+                  <span class="body-sm text-muted">Average Yield Increase</span>
+                  <span class="display-mobile-text text-green">+18%</span>
+                  <p class="body-sm text-muted">Enhanced onion bulb sizing via NPK timing.</p>
+                </div>
+                <div class="metric-card">
+                  <span class="body-sm text-muted">Mandi Realization</span>
+                  <span class="display-mobile-text text-brown">+₹420</span>
+                  <p class="body-sm text-muted">Per Quintal by waiting for favorable price cycle.</p>
+                </div>
+              </div>
+              <div class="farmer-quote">
+                <div class="farmer-avatar">SP</div>
+                <div>
+                  <div class="flex-row">
+                    <span class="headline-sm">Sunita Patil</span>
+                    <span class="tag" style="margin-left:0.5rem">Niphad, Nashik</span>
+                  </div>
+                  <p class="body-sm text-muted">"I do not know how to type long English names of insecticides. Talking directly to the Kisan AI voice assistant in Marathi makes the application as natural as speaking with a seasoned village elder."</p>
+                </div>
+              </div>
+              <div class="partner-banner">
+                <div class="partner-banner__left">
+                  <span class="material-symbols-outlined text-green" style="font-size:1.75rem">handshake</span>
+                  <div>
+                    <div class="label-md">Collaborating with Farmer Producer Orgs (FPOs)</div>
+                    <div class="body-sm text-muted">Deploying pilot nodes across 12 Sahyadri basin cooperatives.</div>
+                  </div>
+                </div>
+                <button class="btn btn--secondary btn--sm" data-page="contact">Partner With Us</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact CTA Section -->
+      <section class="cta-section" id="cta-section">
+        <div class="container">
+          <div class="cta-card">
+            <div class="cta-card__text">
+              <div class="badge badge--green">
+                <span class="material-symbols-outlined">mail</span>
+                Direct Advisory &amp; Partnership
+              </div>
+              <h2 class="headline-lg">Let's Build Resilient Agriculture Together</h2>
+              <p class="body-lg text-muted">Whether you are an agricultural researcher, FPO director, cooperative leader, or precision agronomy technologist, we would love to connect.</p>
+              <div class="contact-row">
+                <div class="email-card">
+                  <span class="material-symbols-outlined text-green">alternate_email</span>
+                  <div>
+                    <span class="body-sm text-muted">Direct Lead Contact</span>
+                    <a class="headline-sm text-brown" href="mailto:aditya@adityaborade.software">aditya@adityaborade.software</a>
+                  </div>
+                </div>
+                <a class="btn btn--secondary btn--lg" href="mailto:aditya@adityaborade.software?subject=Kisan%20AI%20Partnership%20Inquiry">
+                  <span class="material-symbols-outlined">send</span>
+                  Partnership Inquiry
+                </a>
+              </div>
+            </div>
+            <div class="cta-card__form">
+              <h3 class="headline-sm">Request Field Pilot Brief</h3>
+              <p class="body-sm text-muted">Receive telemetry specifications and pilot parameters for your district.</p>
+              <form id="pilot-form" novalidate>
+                <div class="form-group">
+                  <label class="form-label" for="org-name">Your Name / Organization</label>
+                  <input class="form-input" type="text" id="org-name" placeholder="e.g. Sahyadri Agro Collective" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="crop-region">Crop / Region Focus</label>
+                  <input class="form-input" type="text" id="crop-region" placeholder="e.g. Onion, Grapes / Nashik District" required />
+                </div>
+                <button class="btn btn--primary btn--full" type="submit">
+                  <span class="material-symbols-outlined">description</span>
+                  Request Whitepaper &amp; Pilot Access
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /page-overview -->
+
+
+    <!-- ──────────────────────────────────────────────────────────
+         PAGE: CROP INTELLIGENCE
+    ──────────────────────────────────────────────────────────── -->
+    <div class="page hidden" id="page-crop-intelligence">
+      <section class="page-hero bg-surface-low">
+        <div class="container">
+          <div class="page-hero__header">
+            <div class="page-hero__text">
+              <div class="badge badge--green">
+                <span class="material-symbols-outlined">psychology_alt</span>
+                Precision Agronomic Engine v4.2
+              </div>
+              <h1 class="display-text">Crop Recommendation &amp; Income Intelligence</h1>
+              <p class="body-lg text-muted">Personalized crop recommendations powered by soil chemistry, localized weather, micro-climate, and real-time Mandi price telemetry.</p>
+            </div>
+            <div class="page-hero__actions">
+              <button class="btn btn--ghost btn--md">
+                <span class="material-symbols-outlined">share</span>
+                Export Advisory
+              </button>
+              <button class="btn btn--secondary btn--md" id="voice-query-btn">
+                <span class="material-symbols-outlined">mic</span>
+                Bolkar Batayein (Voice Query)
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Metrics -->
+          <div class="metrics-ribbon">
+            <div class="ribbon-metric">
+              <span class="body-sm text-muted">Active Land Parcel</span>
+              <span class="headline-md text-brown">3.00 Acres</span>
+              <span class="body-sm text-green"><span class="material-symbols-outlined icon-sm">pin_drop</span> Dindori Block, MH</span>
+            </div>
+            <div class="ribbon-metric">
+              <span class="body-sm text-muted">Soil Baseline</span>
+              <span class="headline-md text-brown">Black Loam · 7.4 pH</span>
+              <span class="body-sm text-muted"><span class="material-symbols-outlined icon-sm">water_ph</span> Optimal organic carbon</span>
+            </div>
+            <div class="ribbon-metric">
+              <span class="body-sm text-muted">Irrigation Headroom</span>
+              <span class="headline-md text-brown">92% Drip Reserve</span>
+              <span class="body-sm text-green"><span class="material-symbols-outlined icon-sm">water_drop</span> Open Well + Borewell</span>
+            </div>
+            <div class="ribbon-metric">
+              <span class="body-sm text-muted">Target Horizon</span>
+              <span class="headline-md text-brown">Rabi 2025</span>
+              <span class="body-sm text-muted"><span class="material-symbols-outlined icon-sm">calendar_month</span> Sowing: Nov 05-20</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Crop Recommendation Cards -->
+      <section class="container py-xl">
+        <div class="section-header">
+          <div>
+            <span class="label-sm text-green uppercase font-bold">Financial Telemetry</span>
+            <h2 class="headline-lg mt-xs">Recommended Rabi Crops &amp; Net Margin Projections</h2>
+          </div>
+        </div>
+        <div class="crop-cards">
+          <!-- Crop 1 -->
+          <div class="crop-card">
+            <div class="crop-card__badge crop-card__badge--green">92% Match Score</div>
+            <div class="crop-card__icon"><span class="material-symbols-outlined text-green">eco</span></div>
+            <div class="label-sm text-muted uppercase">Rabi Main Crop</div>
+            <h3 class="headline-md">Nashik Red Onion</h3>
+            <div class="crop-price-block">
+              <span class="body-sm text-muted">Net Projected Realization</span>
+              <div class="display-text text-brown">₹1,80,000</div>
+              <span class="body-sm text-green font-bold"><span class="material-symbols-outlined icon-sm">trending_up</span> ₹2,450/qtl Lasalgaon Forecast</span>
+            </div>
+            <div class="crop-details">
+              <div class="crop-detail-row"><span class="text-muted">Cost of Cultivation</span><span class="label-md text-brown">₹52,000 / acre</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Cycle Duration</span><span class="label-md text-brown">115–125 Days</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Estimated Yield</span><span class="label-md text-brown">90–105 Quintals</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Water Consumption</span><span class="label-md text-green font-bold">Medium (320 mm)</span></div>
+            </div>
+            <div class="crop-card__footer">
+              <span class="body-sm text-muted">High Mandi Liquidity</span>
+              <button class="link-btn text-green">Plan Cycle <span class="material-symbols-outlined icon-sm">arrow_forward</span></button>
+            </div>
+          </div>
+
+          <!-- Crop 2 -->
+          <div class="crop-card">
+            <div class="crop-card__badge crop-card__badge--brown">Highest Gross Margin</div>
+            <div class="crop-card__icon"><span class="material-symbols-outlined text-brown">yard</span></div>
+            <div class="label-sm text-muted uppercase">Protected Cultivation</div>
+            <h3 class="headline-md">Colored Capsicum</h3>
+            <div class="crop-price-block">
+              <span class="body-sm text-muted">Net Projected Realization</span>
+              <div class="display-text text-brown">₹2,35,000</div>
+              <span class="body-sm text-green font-bold"><span class="material-symbols-outlined icon-sm">trending_up</span> ₹42–55/kg Mumbai Mandi</span>
+            </div>
+            <div class="crop-details">
+              <div class="crop-detail-row"><span class="text-muted">Cost of Cultivation</span><span class="label-md text-brown">₹88,000 / acre</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Cycle Duration</span><span class="label-md text-brown">150–180 Days</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Estimated Yield</span><span class="label-md text-brown">140–160 Quintals</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Water Consumption</span><span class="label-md text-green font-bold">Strict Drip Required</span></div>
+            </div>
+            <div class="crop-card__footer">
+              <span class="body-sm text-muted">Requires Trellis Support</span>
+              <button class="link-btn text-green">Plan Cycle <span class="material-symbols-outlined icon-sm">arrow_forward</span></button>
+            </div>
+          </div>
+
+          <!-- Crop 3 -->
+          <div class="crop-card">
+            <div class="crop-card__badge crop-card__badge--neutral">Long-term Buffer</div>
+            <div class="crop-card__icon"><span class="material-symbols-outlined text-green">nutrition</span></div>
+            <div class="label-sm text-muted uppercase">Rhizome High Return</div>
+            <h3 class="headline-md">Ginger (Varada)</h3>
+            <div class="crop-price-block">
+              <span class="body-sm text-muted">Net Projected Realization</span>
+              <div class="display-text text-brown">₹2,20,000</div>
+              <span class="body-sm text-green font-bold"><span class="material-symbols-outlined icon-sm">show_chart</span> ₹6,200/qtl Seasonal Peak</span>
+            </div>
+            <div class="crop-details">
+              <div class="crop-detail-row"><span class="text-muted">Cost of Cultivation</span><span class="label-md text-brown">₹74,000 / acre</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Cycle Duration</span><span class="label-md text-brown">210–240 Days</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Estimated Yield</span><span class="label-md text-brown">75–90 Quintals</span></div>
+              <div class="crop-detail-row"><span class="text-muted">Water Consumption</span><span class="label-md text-green font-bold">Continuous Mulched</span></div>
+            </div>
+            <div class="crop-card__footer">
+              <span class="body-sm text-muted">Excellent Storing Value</span>
+              <button class="link-btn text-green">Plan Cycle <span class="material-symbols-outlined icon-sm">arrow_forward</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mandi Table -->
+        <div class="mandi-table-card">
+          <div class="mandi-table-card__header">
+            <div class="flex-row">
+              <span class="material-symbols-outlined text-green" style="font-size:1.75rem">query_stats</span>
+              <div>
+                <h3 class="headline-sm">Regional Mandi Telemetry Feed</h3>
+                <p class="body-sm text-muted">Live eNAM &amp; APMC arrival rates across Nashik, Lasalgaon, and Pimpalgaon</p>
+              </div>
+            </div>
+            <span class="tag"><span class="material-symbols-outlined icon-sm">history</span> Updated 35 mins ago</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Commodity</th>
+                  <th>APMC Market</th>
+                  <th>Daily Arrivals</th>
+                  <th>Modal Price</th>
+                  <th>30-Day Trend</th>
+                  <th class="text-right">Harvest Window Projection</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="label-md text-brown">Red Onion (Garva)</td>
+                  <td class="text-muted">Lasalgaon APMC</td>
+                  <td class="text-muted">14,200 Qtl</td>
+                  <td class="label-md text-green font-bold">₹2,380 / Qtl</td>
+                  <td class="text-green font-bold">▲ +14.2%</td>
+                  <td class="text-right label-sm text-brown">₹2,600 – ₹2,900 / Qtl</td>
+                </tr>
+                <tr>
+                  <td class="label-md text-brown">Green Capsicum</td>
+                  <td class="text-muted">Nashik (Panchavati)</td>
+                  <td class="text-muted">1,850 Qtl</td>
+                  <td class="label-md text-green font-bold">₹4,200 / Qtl</td>
+                  <td class="text-green font-bold">▲ +8.7%</td>
+                  <td class="text-right label-sm text-brown">₹4,400 – ₹4,800 / Qtl</td>
+                </tr>
+                <tr>
+                  <td class="label-md text-brown">Ginger (Wet Rhizome)</td>
+                  <td class="text-muted">Pimpalgaon Baswant</td>
+                  <td class="text-muted">620 Qtl</td>
+                  <td class="label-md text-green font-bold">₹5,950 / Qtl</td>
+                  <td class="text-green font-bold">▲ +21.4%</td>
+                  <td class="text-right label-sm text-brown">₹6,200 – ₹6,800 / Qtl</td>
+                </tr>
+                <tr>
+                  <td class="label-md text-brown">Wheat (Lokwan HD)</td>
+                  <td class="text-muted">Niphad Yard</td>
+                  <td class="text-muted">3,100 Qtl</td>
+                  <td class="label-md text-brown font-bold">₹2,420 / Qtl</td>
+                  <td class="text-muted font-bold">▶ Stable</td>
+                  <td class="text-right label-sm text-brown">₹2,450 – ₹2,550 / Qtl</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div><!-- /page-crop-intelligence -->
+
+
+    <!-- ──────────────────────────────────────────────────────────
+         PAGE: DISEASE DETECTION
+    ──────────────────────────────────────────────────────────── -->
+    <div class="page hidden" id="page-disease-detection">
+      <section class="page-hero">
+        <div class="container">
+          <div class="page-hero__header">
+            <div class="page-hero__text">
+              <div class="badge badge--green">
+                <span class="material-symbols-outlined">biotech</span>
+                Field Agropathology &amp; Spatial Vision
+              </div>
+              <h1 class="display-text">Computer Vision Plant Pathology</h1>
+              <p class="body-lg text-muted">Instant crop disease detection and diagnosis directly from smartphone photos, trained on regional crop cultivars under extreme field sunlight conditions.</p>
+            </div>
+            <div class="stat-cards-col">
+              <div class="stat-card-row">
+                <div class="stat-icon stat-icon--green"><span class="material-symbols-outlined">document_scanner</span></div>
+                <div><div class="headline-md">340,000+</div><div class="body-sm text-muted">Validated Foliar &amp; Fruit Scans</div></div>
+              </div>
+              <div class="stat-card-row">
+                <div class="stat-icon stat-icon--brown"><span class="material-symbols-outlined">verified</span></div>
+                <div><div class="headline-md">96.8% F1 Score</div><div class="body-sm text-muted">Sub-Tropical Cultivar Precision</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scan Simulator -->
+      <section class="container py-xl">
+        <div class="scan-simulator">
+          <div class="scan-simulator__text">
+            <span class="label-sm text-green uppercase font-bold">Field Simulator</span>
+            <h2 class="headline-lg mt-xs">Test Live Foliar Diagnostic</h2>
+            <p class="body-md text-muted">Simulate a camera snapshot under midday glare. The model segments necrotic regions and checks for fungal spores or bacterial exudates in milliseconds.</p>
+            <div class="scan-btns">
+              <label class="btn btn--secondary btn--lg cursor-pointer">
+                <span class="material-symbols-outlined">photo_camera</span>
+                Simulate Live Lens
+                <input type="file" accept="image/*" class="hidden" id="lens-input" />
+              </label>
+              <button class="btn btn--ghost btn--lg" id="load-reference-btn">
+                <span class="material-symbols-outlined">psychology</span>
+                Load Reference Orchard Scan
+              </button>
+            </div>
+          </div>
+          <div class="scan-specs">
+            <div class="scan-spec-header"><span>Camera Pre-Processing</span><span class="text-green font-bold">Autofocus Ready</span></div>
+            <div class="scan-spec"><span class="material-symbols-outlined text-green">light_mode</span><span>Adaptive Glare Suppression (Anti-Sunlight)</span></div>
+            <div class="scan-spec"><span class="material-symbols-outlined text-green">crop_free</span><span>Multi-Scale Leaf ROI Bounding Active</span></div>
+            <div class="scan-spec"><span class="material-symbols-outlined text-green">speed</span><span>Inference Speed: ~180ms On-Device</span></div>
+          </div>
+        </div>
+
+        <!-- AI Pipeline Steps -->
+        <div class="pipeline-steps-grid">
+          <div class="pipeline-step-card">
+            <div class="pipeline-step-card__num">01</div>
+            <h3 class="headline-sm">Foliar Capture</h3>
+            <p class="body-sm text-muted">Direct high-luminance sensor ingest. Image stabilization neutralizes wind-induced leaf vibration.</p>
+            <div class="pipeline-step-card__meta"><span class="label-sm text-muted">Sensor Matrix</span><span class="body-sm font-bold">1080p RGB + Macro Focal Auto-Lock</span></div>
+          </div>
+          <div class="pipeline-step-card">
+            <div class="pipeline-step-card__num">02</div>
+            <h3 class="headline-sm">ROI Segmentation</h3>
+            <p class="body-sm text-muted">U-Net semantic mask decouples background soil, irrigation piping, and farmer fingers from symptomatic leaf parenchyma.</p>
+            <div class="pipeline-step-card__meta"><span class="label-sm text-muted">Masking Resolution</span><span class="body-sm font-bold">512×512 Sub-pixel Polygon Contours</span></div>
+          </div>
+          <div class="pipeline-step-card">
+            <div class="pipeline-step-card__num">03</div>
+            <h3 class="headline-sm">CNN Classification</h3>
+            <p class="body-sm text-muted">Pruned MobileNet-V4 architecture extracts lesion morphology, chlorosis gradients, oily spots, and fruiting fungal bodies.</p>
+            <div class="pipeline-step-card__meta"><span class="label-sm text-muted">Pathology Library</span><span class="body-sm font-bold">124 Fungal, Bacterial &amp; Viral Classes</span></div>
+          </div>
+          <div class="pipeline-step-card">
+            <div class="pipeline-step-card__num">04</div>
+            <h3 class="headline-sm">Action Plan &amp; Audio</h3>
+            <p class="body-sm text-muted">Translates probabilistic weights into precise agrochemical dosage, withholding periods, and vernacular vocal directions.</p>
+            <div class="pipeline-step-card__meta"><span class="label-sm text-muted">Output Delivery</span><span class="body-sm font-bold">Bilingual Text + Offline TTS Audio</span></div>
+          </div>
+        </div>
+      </section>
+    </div><!-- /page-disease-detection -->
+
+
+    <!-- ──────────────────────────────────────────────────────────
+         PAGE: WEATHER PLATFORM
+    ──────────────────────────────────────────────────────────── -->
+    <div class="page hidden" id="page-weather-platform">
+      <section class="page-hero bg-surface-low">
+        <div class="container">
+          <div class="badge badge--green">
+            <span class="material-symbols-outlined">cloud_sync</span>
+            Sub-Kilometer Microclimate Radar
+          </div>
+          <h1 class="display-text mt-sm">Weather Intelligence Platform</h1>
+          <p class="body-lg text-muted">Farm-specific microclimate telemetry designed to eliminate guesswork around critical agricultural operations.</p>
+        </div>
+      </section>
+
+      <section class="container py-xl">
+        <div class="weather-dashboard">
+          <!-- Current Conditions -->
+          <div class="weather-current">
+            <div class="weather-current__main">
+              <span class="material-symbols-outlined" style="font-size:4rem;color:var(--c-secondary)">wb_sunny</span>
+              <div>
+                <div class="display-text text-brown">28°C</div>
+                <div class="headline-sm">Nashik Microclimate</div>
+                <div class="body-sm text-muted">Lat: 20.00°N · Lon: 73.78°E</div>
+              </div>
+            </div>
+            <div class="weather-current__details">
+              <div class="weather-detail"><span class="material-symbols-outlined text-green">water_drop</span><span class="label-md">Humidity: 48%</span></div>
+              <div class="weather-detail"><span class="material-symbols-outlined text-green">air</span><span class="label-md">Wind: 9 km/h NE</span></div>
+              <div class="weather-detail"><span class="material-symbols-outlined text-green">thermostat</span><span class="label-md">Dew Point: 16°C</span></div>
+              <div class="weather-detail"><span class="material-symbols-outlined text-green">compress</span><span class="label-md">Pressure: 1012 hPa</span></div>
+            </div>
+            <div class="spray-window-badge">
+              <span class="material-symbols-outlined text-green">eco</span>
+              <div>
+                <div class="label-lg font-bold text-green">Safe Spray Window</div>
+                <div class="body-sm text-muted">Optimal till 11:30 AM</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hourly Forecast -->
+          <div class="hourly-forecast">
+            <h3 class="headline-sm">Hourly Operations Forecast</h3>
+            <div class="hourly-scroll">
+              <div class="hour-block hour-block--good"><div class="caption">06:00</div><span class="material-symbols-outlined text-green">wb_sunny</span><div class="label-sm text-green font-bold">Good</div><div class="caption">Spray OK</div></div>
+              <div class="hour-block hour-block--optimal"><div class="caption">08:00</div><span class="material-symbols-outlined text-green">cloud</span><div class="label-sm text-green font-bold">Optimal</div><div class="caption">Irrigate</div></div>
+              <div class="hour-block hour-block--optimal"><div class="caption">10:00</div><span class="material-symbols-outlined text-green">wb_sunny</span><div class="label-sm text-green font-bold">Optimal</div><div class="caption">Spray OK</div></div>
+              <div class="hour-block hour-block--caution"><div class="caption">12:00</div><span class="material-symbols-outlined" style="color:orange">wb_sunny</span><div class="label-sm font-bold" style="color:orange">Caution</div><div class="caption">High UV</div></div>
+              <div class="hour-block hour-block--poor"><div class="caption">14:00</div><span class="material-symbols-outlined text-error">thermostat</span><div class="label-sm text-error font-bold">Poor</div><div class="caption">High Heat</div></div>
+              <div class="hour-block hour-block--caution"><div class="caption">16:00</div><span class="material-symbols-outlined" style="color:orange">cloud</span><div class="label-sm font-bold" style="color:orange">Caution</div><div class="caption">Windy</div></div>
+              <div class="hour-block hour-block--good"><div class="caption">17:00</div><span class="material-symbols-outlined text-green">wb_twilight</span><div class="label-sm text-green font-bold">Good</div><div class="caption">Spray OK</div></div>
+              <div class="hour-block hour-block--optimal"><div class="caption">19:00</div><span class="material-symbols-outlined text-green">mode_night</span><div class="label-sm text-green font-bold">Good</div><div class="caption">Cool Down</div></div>
+            </div>
+          </div>
+
+          <!-- Alerts -->
+          <div class="weather-alerts">
+            <h3 class="headline-sm">Active Agricultural Alerts</h3>
+            <div class="alert-item alert-item--advisory">
+              <span class="material-symbols-outlined">water</span>
+              <div>
+                <div class="label-md font-bold">Moderate Rainfall Advisory</div>
+                <div class="body-sm text-muted">15–25mm expected in next 48 hours. Avoid fertilizer application until Tuesday morning.</div>
+              </div>
+              <span class="tag tag--amber">48h Advisory</span>
+            </div>
+            <div class="alert-item alert-item--info">
+              <span class="material-symbols-outlined text-green">thermostat</span>
+              <div>
+                <div class="label-md font-bold">Optimal Disease Pressure Window</div>
+                <div class="body-sm text-muted">Humidity staying below 55%. Low fungal blight risk through Thursday.</div>
+              </div>
+              <span class="tag tag--green">Low Risk</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div><!-- /page-weather-platform -->
+
+
+    <!-- ──────────────────────────────────────────────────────────
+         PAGE: TECHNOLOGY
+    ──────────────────────────────────────────────────────────── -->
+    <div class="page hidden" id="page-technology">
+      <section class="page-hero bg-surface-low">
+        <div class="container">
+          <div class="badge badge--green">
+            <span class="material-symbols-outlined">developer_board</span>
+            Deep Tech Foundation
+          </div>
+          <h1 class="display-text mt-sm">Engineered for Harsh Real-World Farms</h1>
+          <p class="body-lg text-muted">From multi-spectral satellite swarms to sub-second quantized edge models running inside rural cellular dead zones.</p>
+        </div>
+      </section>
+
+      <section class="container py-xl">
+        <div class="tech-stack-grid">
+          <div class="tech-module">
+            <div class="tech-module__icon"><span class="material-symbols-outlined">memory</span></div>
+            <h3 class="headline-md">AI &amp; Machine Learning</h3>
+            <p class="body-md text-muted">Fine-tuned agricultural LLMs trained on regional soil science, agronomy literature, and vernacular farmer query datasets.</p>
+            <ul class="tech-list">
+              <li>Vision Transformer (ViT) for crop pathology</li>
+              <li>INT8 Edge Quantization for offline inference</li>
+              <li>14-year multi-spectral yield telemetry training</li>
+              <li>Marathi/Hindi dialect ASR fine-tuning</li>
+            </ul>
+          </div>
+          <div class="tech-module">
+            <div class="tech-module__icon"><span class="material-symbols-outlined">satellite_alt</span></div>
+            <h3 class="headline-md">Earth Observation</h3>
+            <p class="body-md text-muted">Sentinel-2 &amp; Landsat multi-spectral imagery processed at 10m ground sample distance for precision NDVI and soil health mapping.</p>
+            <ul class="tech-list">
+              <li>Sentinel-2 Level-2A (10m resolution)</li>
+              <li>NDVI, NDRE, NDWI indices</li>
+              <li>Sub-kilometer microclimate radar</li>
+              <li>Bi-weekly satellite revisit cycle</li>
+            </ul>
+          </div>
+          <div class="tech-module">
+            <div class="tech-module__icon"><span class="material-symbols-outlined">sensors</span></div>
+            <h3 class="headline-md">IoT &amp; Field Telemetry</h3>
+            <p class="body-md text-muted">Ground telemetry nodes deployed across agricultural belts ingest real-time soil and environmental data.</p>
+            <ul class="tech-list">
+              <li>Soil moisture &amp; EC sensors (15-min sync)</li>
+              <li>NPK probe with LoRaWAN connectivity</li>
+              <li>Solar-powered node hardware (IP65)</li>
+              <li>Offline data buffering up to 72 hours</li>
+            </ul>
+          </div>
+          <div class="tech-module">
+            <div class="tech-module__icon"><span class="material-symbols-outlined">record_voice_over</span></div>
+            <h3 class="headline-md">Voice &amp; NLP</h3>
+            <p class="body-md text-muted">AI4Bharat-trained Marathi ASR with custom agricultural vocabulary and dialect normalization for field wind-noise environments.</p>
+            <ul class="tech-list">
+              <li>AI4Bharat Whisper ASR (Marathi/Hindi)</li>
+              <li>&lt;1.2s end-to-end voice latency</li>
+              <li>Offline TTS with word-level timing</li>
+              <li>Dialect acoustic normalization</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div><!-- /page-technology -->
+
+
+    <!-- ──────────────────────────────────────────────────────────
+         PAGE: CONTACT
+    ──────────────────────────────────────────────────────────── -->
+    <div class="page hidden" id="page-contact">
+      <section class="page-hero bg-surface-low">
+        <div class="container">
+          <div class="badge badge--green">
+            <span class="material-symbols-outlined">mail</span>
+            Direct Advisory &amp; Partnership
+          </div>
+          <h1 class="display-text mt-sm">Let's Build Resilient Agriculture Together</h1>
+          <p class="body-lg text-muted">Whether you are an agricultural researcher, FPO director, cooperative leader, or precision agronomy technologist, we would love to connect.</p>
+        </div>
+      </section>
+
+      <section class="container py-xl">
+        <div class="contact-grid">
+          <div class="contact-info">
+            <h2 class="headline-lg">Get In Touch</h2>
+            <p class="body-md text-muted">Reach out for partnerships, pilot programs, technical collaborations, or media inquiries.</p>
+            <div class="contact-methods">
+              <div class="contact-method">
+                <div class="contact-method__icon"><span class="material-symbols-outlined text-green">alternate_email</span></div>
+                <div>
+                  <div class="label-sm text-muted">Direct Lead Contact</div>
+                  <a href="mailto:aditya@adityaborade.software" class="headline-sm text-brown">aditya@adityaborade.software</a>
+                </div>
+              </div>
+              <div class="contact-method">
+                <div class="contact-method__icon"><span class="material-symbols-outlined text-green">location_on</span></div>
+                <div>
+                  <div class="label-sm text-muted">Operational Region</div>
+                  <div class="headline-sm">Nashik &amp; Sahyadri Basin, Maharashtra</div>
+                </div>
+              </div>
+            </div>
+            <a class="btn btn--secondary btn--lg" href="mailto:aditya@adityaborade.software?subject=Kisan%20AI%20Partnership%20Inquiry">
+              <span class="material-symbols-outlined">send</span>
+              Send Partnership Inquiry
+            </a>
+          </div>
+          <div class="contact-form-card">
+            <h3 class="headline-sm">Request Field Pilot Brief</h3>
+            <p class="body-sm text-muted">Receive telemetry specifications and pilot parameters for your district.</p>
+            <form id="contact-form" novalidate>
+              <div class="form-group">
+                <label class="form-label" for="c-name">Your Name / Organization</label>
+                <input class="form-input" type="text" id="c-name" placeholder="e.g. Sahyadri Agro Collective" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="c-crop">Crop / Region Focus</label>
+                <input class="form-input" type="text" id="c-crop" placeholder="e.g. Onion, Grapes / Nashik District" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="c-message">Message (Optional)</label>
+                <textarea class="form-input" id="c-message" rows="3" placeholder="Tell us about your farm or organization..."></textarea>
+              </div>
+              <button class="btn btn--primary btn--full" type="submit">
+                <span class="material-symbols-outlined">description</span>
+                Request Whitepaper &amp; Pilot Access
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div><!-- /page-contact -->
+
+  </main>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="site-footer__brand">
+        <div class="brand-logo" aria-hidden="true">🌾</div>
+        <div>
+          <div class="headline-sm">Kisan AI</div>
+          <div class="body-sm text-muted">AI-Powered Agricultural Intelligence</div>
+        </div>
+      </div>
+      <div class="site-footer__nav">
+        <div class="footer-col">
+          <div class="label-sm font-bold">Platform</div>
+          <a href="#" data-page="crop-intelligence" class="footer-link">Crop Intelligence</a>
+          <a href="#" data-page="disease-detection" class="footer-link">Disease Detection</a>
+          <a href="#" data-page="weather-platform" class="footer-link">Weather Platform</a>
+          <a href="#" data-page="technology" class="footer-link">Technology</a>
+        </div>
+        <div class="footer-col">
+          <div class="label-sm font-bold">Connect</div>
+          <a href="#" data-page="contact" class="footer-link">Contact</a>
+          <a href="mailto:aditya@adityaborade.software" class="footer-link">Email Us</a>
+        </div>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <div class="container">
+        <span class="body-sm text-muted">© 2025 Kisan AI · Built for Indian Farmers · Maharashtra, India</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════ VOICE ASSISTANT OVERLAY ═══════════════ -->
+  <div class="voice-overlay hidden" id="voice-overlay" role="dialog" aria-modal="true" aria-label="Voice Assistant">
+    <div class="voice-overlay__card">
+      <button class="voice-overlay__close" id="voice-close-btn" aria-label="Close voice assistant">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <div class="voice-overlay__icon" id="voice-icon">
+        <span class="material-symbols-outlined">mic</span>
+      </div>
+      <h2 class="headline-md">मराठी आवाज सहाय्यक</h2>
+      <p class="body-md text-muted" id="voice-status-text">Hold the button and speak in Marathi, Hindi, or English</p>
+
+      <!-- Live transcript -->
+      <div class="voice-transcript" id="voice-transcript" aria-live="polite"></div>
+
+      <!-- Hold-to-speak Mic Button -->
+      <button class="voice-mic-btn" id="voice-mic-btn" aria-label="Hold to speak">
+        <span class="material-symbols-outlined">mic</span>
+      </button>
+      <p class="caption text-muted">Hold to speak · Release to process</p>
+
+      <!-- Text input alternative -->
+      <div class="voice-text-input">
+        <input class="form-input" type="text" id="voice-text-input" placeholder="Or type your question here..." />
+        <button class="btn btn--secondary btn--sm" id="voice-send-btn">
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </div>
+
+      <!-- Chat area -->
+      <div class="voice-chat" id="voice-chat" aria-live="polite" aria-label="Voice conversation"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="app.js"></script>
-
+  <script src="kisan-app.js"></script>
 </body>
-
 </html>
